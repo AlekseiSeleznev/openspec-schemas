@@ -14,6 +14,13 @@ artifacts:
     description: Collaborative design exploration using Superpowers brainstorming
     template: brainstorm.md
     instruction: |
+      PRECHECK — required skill availability:
+      Before invoking, confirm `superpowers:brainstorming` appears in
+      your available skills list. If missing, STOP and inform the user
+      that the Superpowers plugin must be installed (or that they can
+      explicitly opt to write brainstorm.md manually using the template
+      below). Do NOT silently fall back.
+
       Use the Skill tool to invoke **superpowers:brainstorming**.
 
       IMPORTANT output redirection:
@@ -141,6 +148,13 @@ artifacts:
     description: Micro-task implementation plan using Superpowers writing-plans
     template: plan.md
     instruction: |
+      PRECHECK — required skill availability:
+      Before invoking, confirm `superpowers:writing-plans` appears in
+      your available skills list. If missing, STOP and inform the user
+      that the Superpowers plugin must be installed (or that they can
+      explicitly opt to write plan.md manually using the template
+      below). Do NOT silently fall back.
+
       Use the Skill tool to invoke **superpowers:writing-plans**.
 
       IMPORTANT output redirection:
@@ -215,6 +229,24 @@ apply:
   tracks: tasks.md
   instruction: |
     Before implementing, set up an isolated workspace and executor:
+
+    0. **Pre-flight — verify required Superpowers skills**:
+
+       This schema's apply phase requires the following skills.
+       Confirm each appears in your available skills list before
+       proceeding:
+
+       - superpowers:using-git-worktrees
+       - superpowers:subagent-driven-development
+         (transitively: superpowers:test-driven-development,
+                        superpowers:requesting-code-review)
+       - superpowers:finishing-a-development-branch
+
+       If any required skill is missing, STOP and inform the user —
+       do NOT proceed and do NOT silently fall back to manual
+       implementation. The user can install the Superpowers plugin,
+       or explicitly opt into the manual fallback path described at
+       the end of this instruction.
 
     1. **Workspace**: Use the Skill tool to invoke
        **superpowers:using-git-worktrees** to create an isolated
