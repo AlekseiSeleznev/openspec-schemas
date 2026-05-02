@@ -216,40 +216,6 @@ apply:
   instruction: |
     Before implementing, set up an isolated workspace and executor:
 
-    0. **Pre-flight — commit change artifacts to current branch**:
-
-       Before creating the worktree, verify that the change directory
-       `openspec/changes/<name>/` is committed on the current branch.
-       This prevents drift between the main checkout and the worktree
-       during implementation, and avoids "untracked files would be
-       overwritten by merge" errors when later integrating the worktree
-       back into the main branch.
-
-       Steps:
-       a. Run `git status --porcelain openspec/changes/<name>/` to
-          inspect state.
-       b. If the output contains untracked entries (lines starting
-          with `??`), stage and commit ONLY this change's directory
-          (do NOT use `git add -A`):
-
-          ```
-          git add openspec/changes/<name>/
-          git commit -m "docs(openspec): scaffold <name> change
-
-          Captures pre-implementation artifacts (brainstorm/proposal/
-          specs/tasks/plan) so the implementation worktree starts
-          with the change directory already tracked."
-          ```
-
-       c. If the output is empty (everything committed) or contains
-          only modifications (`M`) without untracked entries, skip
-          the commit — the change directory is already tracked.
-
-       d. If on a detached HEAD or a branch that is not the project's
-          integration branch (typically `main` or `master`), warn the
-          user but still proceed — the commit lands on the current
-          branch and will be merged later as usual.
-
     1. **Workspace**: Use the Skill tool to invoke
        **superpowers:using-git-worktrees** to create an isolated
        git worktree for this change.
