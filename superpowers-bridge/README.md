@@ -35,7 +35,7 @@ claude plugin install superpowers@claude-plugins-official  # if not already
 
 ## 這個 Schema 解決什麼問題
 
-OpenSpec 管理「做什麼」（proposal → specs → design → tasks），Superpowers 管理「怎麼做」（brainstorming、writing-plans、subagent-driven-development）。兩者各自優秀，但在實際開發中交替使用時出現三個結構性問題：
+OpenSpec 管理「做什麼」（artifact 治理:proposal / specs / tasks / verify 等),Superpowers 管理「怎麼做」(執行紀律:brainstorming、writing-plans、TDD、code-review)。兩者各自優秀,但在實際開發中交替使用時出現三個結構性問題:
 
 1. **產出重複** — brainstorming 產出設計文件在 Superpowers 目錄（`docs/superpowers/specs/`），OpenSpec 又在 change 目錄重新撰寫 proposal/design，內容高度重疊。
 2. **Task 分裂** — OpenSpec 的 `tasks.md`（粗粒度 checkbox）和 Superpowers 的 plan（微型 TDD 步驟）描述同一件事，但格式、位置、狀態追蹤各自獨立。
@@ -59,20 +59,22 @@ OpenSpec 管理「做什麼」（proposal → specs → design → tasks），Su
 ## 工作流概覽
 
 ```text
-brainstorm ──→ proposal ──→ specs ──→ tasks ──→ plan
+brainstorm ──→ proposal ──→ specs ──→ tasks ──→ plan ──→ [apply] ──→ verify ──→ retrospective
                   │                     ↑
                   └──→ design ──────────┘
+                       (optional)
 ```
 
-與 `spec-driven` 的差異：
+與 `spec-driven` 的差異:
 
 | | spec-driven | superpowers-bridge |
 |---|---|---|
-| 起點 | proposal（手動撰寫） | **brainstorm**（調用 brainstorming skill） |
-| 終點 | tasks（粗粒度） | **plan**（微型 TDD 步驟） |
+| 起點 | proposal(手動撰寫) | **brainstorm**(調用 brainstorming skill) |
+| Plan 層級 | tasks(粗粒度) | tasks + **plan**(微型 TDD 步驟) |
 | apply 需要 | tasks | **plan** |
-| apply 方式 | 標準 task-by-task | **worktree + subagent-driven-development** |
-| 新增 artifacts | — | brainstorm, plan |
+| apply 方式 | 標準 task-by-task | **worktree + subagent-driven-development**(含 TDD + code-review 傳遞) |
+| Post-apply | (無) | **verify** + **retrospective** artifacts |
+| 新增 artifacts | — | brainstorm, plan, verify, retrospective |
 
 ---
 
@@ -80,13 +82,19 @@ brainstorm ──→ proposal ──→ specs ──→ tasks ──→ plan
 
 | Schema 階段 | 調用的 Superpowers 技能 | 觸發方式 |
 |------------|------------------------|---------|
-| brainstorm artifact | `superpowers:brainstorming` | artifact instruction 指示 |
-| plan artifact | `superpowers:writing-plans` | artifact instruction 指示 |
-| apply phase | `superpowers:using-git-worktrees` | apply instruction 指示 |
-| apply phase | `superpowers:subagent-driven-development` | apply instruction 指示 |
-| apply 完成後 | `superpowers:finishing-a-development-branch` | apply instruction 指示 |
+| brainstorm artifact | `superpowers:brainstorming` | artifact instruction(含 PRECHECK) |
+| plan artifact | `superpowers:writing-plans` | artifact instruction(含 PRECHECK) |
+| apply phase Step 1 | `superpowers:using-git-worktrees` | apply instruction(含 PRECHECK) |
+| apply phase Step 2a | `superpowers:subagent-driven-development` | apply instruction |
+| (transitive) | `superpowers:test-driven-development` | 由 #4 內部自動觸發 |
+| (transitive) | `superpowers:requesting-code-review` | 由 #4 內部自動觸發 |
+| apply phase Step 3 | `openspec-verify-change`(OpenSpec built-in,非 Superpowers) | 產出 verify.md |
+| apply phase Step 4 | `superpowers:finishing-a-development-branch` | apply instruction |
+| retrospective artifact | (內嵌 procedure,非外部 skill) | 6 步驟內嵌在 instruction |
 
-所有整合都透過 schema.yaml 的 `instruction` 欄位實現 — 指示 AI 在適當時機用 Skill tool 調用對應技能。不修改任何 Superpowers 技能檔案本身。
+所有整合都透過 schema.yaml 的 `instruction` 欄位實現 — 指示 AI 在適當時機用 Skill tool 調用對應技能。每個 Superpowers skill 在 invoke 前會跑一次 PRECHECK,缺失就 STOP 不靜默 fallback。**不修改任何 Superpowers 技能檔案本身**。
+
+`retrospective` artifact 是本 schema 在 v1 補上 Superpowers 缺的能力(沒有 retro skill),procedure 直接內嵌 schema instruction。v1.x 後若有需求會升級成獨立 plugin(見 [docs/roadmap.md](../docs/roadmap.md))。
 
 ### Output Redirection（產出重導）
 
@@ -101,23 +109,27 @@ Superpowers 技能有預設的輸出路徑（如 brainstorming 寫到 `docs/supe
 
 ## 使用方式
 
-### 快速流程（推薦）
+### 快速流程(推薦)
 ```bash
-/opsx:ff my-feature    # 一條龍：建目錄 + brainstorm + proposal + design + specs + tasks + plan
-/opsx:apply            # worktree + subagent-driven-development
+/opsx:ff my-feature    # 一條龍:建目錄 + brainstorm + proposal + design + specs + tasks + plan
+/opsx:apply            # worktree + subagent-driven-development(含 TDD + code-review)
+/opsx:verify           # 產出 verify.md(5 項檢查)
+/opsx:continue         # → retrospective(產出 retrospective.md,6 sections)
 /opsx:archive          # 封存
 ```
 
 ### 逐步流程
 ```bash
 /opsx:new my-feature --schema superpowers-bridge
-/opsx:continue         # → brainstorm（互動式對話）
+/opsx:continue         # → brainstorm(互動式對話)
 /opsx:continue         # → proposal
-/opsx:continue         # → design（optional，僅在需要解釋技術決策時）
+/opsx:continue         # → design(optional,僅在需要解釋技術決策時)
 /opsx:continue         # → specs
 /opsx:continue         # → tasks
 /opsx:continue         # → plan
-/opsx:apply
+/opsx:apply            # → 實作 + worktree + subagent-driven-development
+/opsx:verify           # → verify.md(post-apply,跑 5 項檢查)
+/opsx:continue         # → retrospective.md(post-verify,evidence-first 6 sections)
 /opsx:archive
 ```
 

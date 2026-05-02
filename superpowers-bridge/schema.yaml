@@ -255,8 +255,11 @@ artifacts:
       1. verify.md exists:
          test -f openspec/changes/<change-name>/verify.md
 
-      2. verify.md does not contain unresolved blocking issues:
-         ! grep -q '^- 🔴' openspec/changes/<change-name>/verify.md
+      2. verify.md's Overall Decision is NOT marked as FAIL.
+         The verify.md template has 3 mutually-exclusive checkboxes
+         in its "Overall Decision" section: "✅ PASS", "⚠️ PASS WITH
+         WARNINGS", "❌ FAIL". Only "❌ FAIL" being checked is blocking:
+         ! grep -q '^- \[x\] ❌ FAIL' openspec/changes/<change-name>/verify.md
 
       Only after both succeed, proceed.
 

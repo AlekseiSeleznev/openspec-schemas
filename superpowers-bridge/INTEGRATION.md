@@ -161,11 +161,20 @@ openspec validate --all --json
 
 這會觸發 [schema.yaml](./schema.yaml) `apply.instruction` 的步驟：
 
-#### 3-0. Pre-flight — 先把 change artifact commit 到當前分支
+#### 3-0. Pre-flight — 驗證必要的 Superpowers skill
 
-在建立 worktree 之前，先確認 `openspec/changes/<name>/` 已在當前分支上被追蹤。若仍是 untracked（`git status --porcelain` 輸出含 `??`），就 **只 commit 該 change 目錄**（不要用 `git add -A`）為 `docs(openspec): scaffold <name> change`。
+在建立 worktree 之前，schema 會檢查本 apply 階段所需的 4 個 skill 是否已安裝：
 
-**為什麼需要這步**：worktree 會從當前 branch 開新 branch；若 change 目錄在 main 端仍未追蹤，之後把 worktree merge 回 main 時會遇到 "untracked files would be overwritten by merge" 錯誤。這一步把「planning 階段的產物」與「implementation 階段的產物」分到兩個 commit，讓 main 分支在任何時刻都不會有漂移的 untracked 副本。
+- `superpowers:using-git-worktrees`
+- `superpowers:subagent-driven-development`
+  - 傳遞依賴：`superpowers:test-driven-development`、`superpowers:requesting-code-review`
+- `superpowers:finishing-a-development-branch`
+
+任何一個缺失就 **STOP 並通知使用者**，不繼續執行、不 silent fallback 到手動實作。使用者可選擇安裝 Superpowers plugin，或明確 opt-in 走 instruction 末段的 manual fallback 路徑。
+
+**為什麼這樣設計**：本 schema 的 apply 與 Superpowers skill 強耦合（schema.yaml 寫死 skill 名稱）。若 skill 缺失就硬跑，會導致 LLM 自行解讀 prompt 並產出無法重現的結果。寧可早失敗、明確告知，也不要靜默漂移。註：本驗證是 prompt-level 強制，OpenSpec 引擎本身目前不認識 skill 概念；若 OpenSpec 未來支援 schema-level capability detection（類似 spec-kit 的 `extension.yml` `requires.tools[]`），此 step 會替換為 manifest 宣告。
+
+> 本 schema 的 v0 版本曾在此處放「自動 commit change artifacts 到當前分支」邏輯，已在 [PR #970 review](https://github.com/Fission-AI/OpenSpec/pull/970) 後移除：處理未追蹤的 change 目錄是 worktree skill 的責任，schema 不該主動改寫使用者的 git history。
 
 #### 3-1. Workspace — 呼叫 `superpowers:using-git-worktrees`
 
@@ -262,25 +271,35 @@ openspec validate --all --json
 
 ---
 
-## 六、整合的精巧之處（值得記住的 5 個設計）
+## 六、整合的精巧之處(值得記住的 6 個設計)
 
-### 1. Output redirection
+### 1. Skill-name PRECHECK(Layer 1 capability detection)
+
+每個 invoke Superpowers skill 的 artifact / apply step 都在 instruction 開頭跑一次 PRECHECK,確認 skill 真的存在於 LLM 的 available skills list 裡:
+
+- `brainstorm` artifact instruction → 檢查 `superpowers:brainstorming`
+- `plan` artifact instruction → 檢查 `superpowers:writing-plans`
+- `apply.instruction` Step 0 → 檢查 4 個 skill(`using-git-worktrees`、`subagent-driven-development`、`finishing-a-development-branch`,加上 transitive 兩個)
+
+**缺失就 STOP,不靜默 fallback**。這是 [PR #970 review](https://github.com/Fission-AI/OpenSpec/pull/970) 顧慮 #1 第 1 層的具體應對 —— alfred-openspec 擔心「如果 Superpowers 改名,OpenSpec 會 silently ship 壞掉的 schema」,我們的回應是 **fail loud, fail early**。
+
+### 2. Output redirection
 
 Superpowers 的 brainstorming 原本會寫到 `docs/superpowers/specs/`，writing-plans 寫到 `docs/superpowers/plans/`。我們的 artifact instruction **覆寫這個行為**，透過 prompt 上下文注入「寫到 change 目錄」的指示。不改 superpowers 源碼、不改 OpenSpec CLI。
 
-### 2. Schema-level vs prompt-level 整合
+### 3. Schema-level vs prompt-level 整合
 
 整合完全發生在 `instruction` 欄位（純 prompt）。如果 superpowers 升級了某個 skill 的行為，我們**完全不用動 schema**。只有當 skill 被重新命名或移除時才需要 touch schema.yaml。
 
-### 3. 傳遞依賴顯式化
+### 4. 傳遞依賴顯式化
 
 TDD 和 code-review 原本藏在 subagent-driven-development 內部（SKILL.md 裡才看得到）。schema 在 apply step 2a 的 instruction 裡**直接列出**這兩個 transitive activation，讓讀者一眼就看懂「apply 階段到底會發生什麼」。
 
-### 4. Fallback 路徑誠實標註
+### 5. Fallback 路徑誠實標註
 
 2b（executing-plans）存在但標為「platforms without subagent support」的 fallback，引用 superpowers 官方 SKILL.md L14 原文。我們不發明「小 change 用 2b」這種自創規則。
 
-### 5. Verify 與 retrospective 是時序錯位的 artifacts(已知限制)
+### 6. Verify 與 retrospective 是時序錯位的 artifacts(已知限制)
 
 `verify` 的 `requires: [plan]` 與 `retrospective` 的 `requires: [verify]` 在 schema graph 上是「檔案存在」依賴，但兩者的 instruction 都明寫「MUST run AFTER apply phase / verify pass」。這是 OpenSpec 引擎能力不足造成的刻意錯位 —— 引擎只會檢查前置 artifact 檔案存在，不會檢查 apply phase 是否真的跑完、verify 是否真的 pass。
 
