@@ -1,5 +1,7 @@
 # Roadmap
 
+[English](./roadmap.md) · [繁體中文](./roadmap.zh-TW.md)
+
 This repository is actively maintained as a side project. The roadmap below sketches what's planned but isn't a contract — items can shift based on what real usage surfaces.
 
 ## v1 — Released

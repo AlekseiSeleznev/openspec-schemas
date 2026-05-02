@@ -65,7 +65,7 @@ openspec-schemas/                  ← 本 repo
 |---------|------|
 | 入口 `README.md` | 英文 canonical + `README.zh-TW.md` 翻譯 + 頂端切換連結 |
 | `CLAUDE.md`(這份) | 繁中(給維護者 + Claude;國際讀者由 README 入口進來) |
-| `docs/install.md`、`docs/roadmap.md` | 英文(目前未翻譯) |
+| `docs/install.md`、`docs/roadmap.md` | 英文 canonical + `.zh-TW.md` 翻譯 + 切換連結 |
 | `superpowers-bridge/README.md`、`INTEGRATION.md` | 英文 canonical + `.zh-TW.md` 翻譯 + 切換連結 |
 | `schema.yaml`、`templates/*.md`、`extension.yml` | 英文(機器讀 + 國際讀者) |
 | Commit message | 英文(國際慣例) |

@@ -1,12 +1,12 @@
-# Install guide
+# 安裝指南
 
 [English](./install.md) · [繁體中文](./install.zh-TW.md)
 
-This repository hosts multiple OpenSpec schema bundles. Pick the bridge you want, then install via either method below.
+本 repo 提供多個 OpenSpec schema bundle。挑選你想用的 bridge,然後選下面其中一種方法安裝。
 
-## Method 1: Claude Code one-shot prompt (recommended)
+## 方法 1:Claude Code 一鍵 prompt(推薦)
 
-Open Claude Code in your project root and paste this prompt (substitute `<bridge-name>` with `superpowers-bridge` or another bridge):
+在你專案的根目錄打開 Claude Code,把下面這段 prompt 貼進去(把 `<bridge-name>` 換成 `superpowers-bridge` 或其他 bridge):
 
 ```
 Install the <bridge-name> schema for OpenSpec into this project:
@@ -23,12 +23,12 @@ Install the <bridge-name> schema for OpenSpec into this project:
 8. Show me the final state.
 ```
 
-Claude will execute the install end-to-end, including any per-bridge dependencies.
+Claude 會把整個安裝跑完,包含 bridge 需要的依賴。
 
-## Method 2: Manual bash (CI / non-Claude environments)
+## 方法 2:手動 bash(CI / 非 Claude 環境)
 
 ```bash
-# Replace <bridge-name>
+# 把 <bridge-name> 換成你要的
 BRIDGE=superpowers-bridge
 git clone https://github.com/JiangWay/openspec-schemas /tmp/oss
 cp -R /tmp/oss/$BRIDGE ~/your-project/openspec/schemas/$BRIDGE
@@ -38,22 +38,22 @@ openspec schema validate $BRIDGE
 openspec schemas
 ```
 
-For Superpowers-dependent bridges:
+需要 Superpowers 的 bridge:
 
 ```bash
 claude plugin install superpowers@claude-plugins-official
 ```
 
-## Verify
+## 驗證
 
-After install, in your project root:
+安裝後,在你專案根目錄跑:
 
 ```bash
-openspec schemas       # Should list the new schema as "(project)"
-openspec schema validate <bridge-name>  # Should print ✓ valid
+openspec schemas       # 應該列出新 schema 並標 "(project)"
+openspec schema validate <bridge-name>  # 應該印出 ✓ valid
 ```
 
-To use the new schema for a change:
+對某個 change 用新 schema:
 
 ```bash
 /opsx:new my-feature --schema <bridge-name>
