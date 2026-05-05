@@ -60,6 +60,62 @@ OpenSpec 管 **「做什麼」**(artifact 生命週期:proposal / specs / tasks 
 
 ---
 
+## 進入與離開的判斷(Entry & exit gates)
+
+本 schema 的 instruction 只在 `/opsx:*` 指令啟動 artifact 時才注入 prompt。如果你以 narrative 方式觸發 Superpowers skill(例如直接對 Claude 說「我們討論一下架構」),預設行為會繞過本 schema —— brainstorming 仍會寫到 `docs/superpowers/specs/`,讓整合的 redirection 完全失效。
+
+這一段告訴你三件事:
+
+1. 何時根本不需要進入本 schema(直接 PR 即可)
+2. 已經在 verbal brainstorm,何時該升級成 opsx change
+3. 進入本 schema 時要避開的 front-door 反模式
+
+### 何時不進入本 schema(直接 PR)
+
+並非每個改動都要走 change 流程。下列情境**不需要**建 change:
+
+| 情境 | 是否要建 change | 怎麼做 |
+|---|---|---|
+| 新功能 / 新 capability | ✅ 要 | `/opsx:new <name> --schema superpowers-bridge` |
+| Breaking change | ✅ 要 | 同上 |
+| 架構變更 | ✅ 要 | 同上 |
+| Bug fix(恢復原本行為,不變更合約) | ❌ 不要 | 直接 PR |
+| 測試補寫 / 覆蓋率 | ❌ 不要 | 直接 PR |
+| 建置工具微調(linter 規則、覆蓋率門檻等) | ❌ 不要 | 直接 PR |
+| 非破壞性依賴升級 | ❌ 不要 | 直接 PR |
+| 文件更新 / typo 修正 | ❌ 不要 | 直接 PR |
+| Config 值微調(不動結構) | ❌ 不要 | 直接 PR |
+
+> 原則:**流程儀式跟風險成正比**。動到對外合約、跨系統介接、DB schema、合規邊界 → 走 change;改 typo、抓 bug、調 timeout 數字 → 直接 PR。模糊地帶用下方 5 條 checklist 自我檢驗。
+
+### 進行中的 verbal brainstorm 何時升級成 change
+
+如果使用者以 narrative(「我們來討論架構」「腦力激盪一下」)觸發了 `superpowers:brainstorming`,brainstorming 的產出**不可以**寫到 `docs/superpowers/specs/` —— 那會繞過本 schema 的 output redirection,在 repo 裡留下 orphan artifact。
+
+正確流程:在以下 5 條判準**全部滿足**之前,維持 verbal brainstorm;全滿足時升級到 `/opsx:propose` 或 `/opsx:new`,讓 brainstorming 的對話結論落到 `openspec/changes/<name>/brainstorm.md`。
+
+1. **Scope 鎖定** —— 一句話講清「包含什麼、不包含什麼」,且不會在每一輪對話又長出新項目
+2. **主要設計分歧已收斂** —— 替代方案討論過、選了一個;剩下的 unknown 是**明確列出的 TBD**(有 owner、有影響面),不是「還沒想到」
+3. **跨系統依賴盤點過** —— 對方就緒 / 暫 mock 替代 / 真未知,三選一講得清
+4. **驗收條件可陳述** —— 能列出「這個 change 做完的判準」(例:`./mvnw clean verify` 通過 + N 個具體成果)
+5. **對話進入收斂** —— 最近 1-2 輪沒有「啊還有另一種做法是...」這種 fork
+
+任一條缺 → 繼續 brainstorm。全滿足 →:
+- LLM **應主動建議** 「看起來條件齊了,要不要開 `/opsx:propose`?」
+- 使用者**也可主動講** 「把這個開成 change 吧」
+- 不論誰先提,**升級都需人類 ack**,不會自動觸發
+
+### Front-door 反模式
+
+| 反模式 | 為什麼錯 |
+|---|---|
+| schema 已安裝後仍讓 brainstorming 寫到 `docs/superpowers/specs/` | 繞過 [schema.yaml](./schema.yaml) line 35-39 的 redirection,留下 orphan artifact |
+| 讓 writing-plans 寫到 `docs/superpowers/plans/` | 同理(schema.yaml line 169-171) |
+| TBD 還沒收斂就升級到 opsx | 那些 TBD 在 apply phase 一樣會擋住進度,只是把問題往後挪 |
+| 對 bug fix / typo 也建 change | 流程儀式 > 實質風險,反而拖慢交付 |
+
+---
+
 ## 工作流與整合點
 
 ### Artifact DAG

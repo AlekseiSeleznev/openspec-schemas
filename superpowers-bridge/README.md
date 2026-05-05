@@ -60,6 +60,62 @@ A custom schema uses OpenSpec's **native project-level schema mechanism**: the C
 
 ---
 
+## Entry & exit gates
+
+This schema's instructions only fire when invoked through `/opsx:*` commands. If you trigger Superpowers skills via narrative — for example, by saying "let's discuss the architecture" — the default behavior bypasses the schema. Brainstorming will still write to `docs/superpowers/specs/`, defeating the integration's redirection.
+
+This section covers three things:
+
+1. When you don't need to enter the schema at all (just open a PR)
+2. When verbal brainstorming should be promoted to an opsx change
+3. Front-door anti-patterns to avoid once the schema is installed
+
+### When NOT to enter the schema (direct PR)
+
+Not every change needs a `change` directory. The following scenarios should skip opsx entirely:
+
+| Scenario | Need a change? | What to do |
+|---|---|---|
+| New feature / new capability | ✅ Yes | `/opsx:new <name> --schema superpowers-bridge` |
+| Breaking change | ✅ Yes | Same |
+| Architecture change | ✅ Yes | Same |
+| Bug fix (restoring intended behavior, no contract change) | ❌ No | Direct PR |
+| Test backfill / coverage | ❌ No | Direct PR |
+| Build tooling tweak (linter rule, coverage threshold) | ❌ No | Direct PR |
+| Non-breaking dependency upgrade | ❌ No | Direct PR |
+| Documentation update / typo fix | ❌ No | Direct PR |
+| Config value tweak (no structural change) | ❌ No | Direct PR |
+
+> Principle: **process ceremony should scale with risk**. External contracts, cross-system integration, DB schema changes, compliance boundaries → run a change. Typos, bug fixes, timeout adjustments → direct PR. For ambiguous cases, use the 5-condition checklist below.
+
+### When verbal brainstorming should be promoted to a change
+
+If `superpowers:brainstorming` was triggered via narrative ("let's brainstorm the architecture") in a project that uses this schema, the brainstorming output **MUST NOT** land in `docs/superpowers/specs/` — that bypasses the schema's output redirection and creates orphan artifacts.
+
+The correct flow: keep brainstorming verbally until all 5 conditions below hold, then promote to `/opsx:propose` or `/opsx:new` so the agreed design lands in `openspec/changes/<name>/brainstorm.md`.
+
+1. **Scope locked** — one sentence describes what's in / out, and the scope doesn't keep growing each turn
+2. **Major design forks resolved** — alternatives have been weighed and one chosen; remaining unknowns are **explicit TBDs** (with owner and impact-scope statement), not "haven't thought about it yet"
+3. **Cross-system dependencies mapped** — for each dependency: ready / mockable / genuinely unknown — pick one
+4. **Acceptance criteria stateable** — concrete pass conditions (e.g., `./mvnw clean verify` passes + N specific deliverables)
+5. **Conversation converging** — the last 1-2 turns are confirmations, not new "what about..." forks
+
+If any condition is missing, keep brainstorming. When all five hold:
+- The model **should proactively suggest** "this looks ready for `/opsx:propose` — want to open a change?"
+- The user **may also explicitly say** "open this as an opsx change"
+- Either way, **promotion requires a deliberate human ack** — never automatic
+
+### Front-door anti-patterns
+
+| Anti-pattern | Why it's wrong |
+|---|---|
+| Letting brainstorming write to `docs/superpowers/specs/` after the schema is installed | Bypasses redirection at [schema.yaml](./schema.yaml) lines 35-39; produces orphan artifacts |
+| Letting writing-plans write to `docs/superpowers/plans/` | Same reason (schema.yaml lines 169-171) |
+| Promoting to opsx with unresolved blocking TBDs | Those TBDs will block apply phase too — promotion just defers the same problem |
+| Opening a change for bug fix / typo / config tweak | Process ceremony exceeds actual risk; slows delivery without value |
+
+---
+
 ## Workflow & integration
 
 ### Artifact DAG
