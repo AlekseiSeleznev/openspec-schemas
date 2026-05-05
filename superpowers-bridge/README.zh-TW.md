@@ -22,10 +22,11 @@ Install the superpowers-bridge schema for OpenSpec into this project:
 3. Copy the `superpowers-bridge/` subdirectory to `openspec/schemas/superpowers-bridge/`.
 4. Run `openspec schema validate superpowers-bridge` to verify.
 5. Run `openspec schemas` and confirm `superpowers-bridge` is listed.
-6. Clean up the temp directory.
-7. Verify Superpowers plugin is installed by running `claude plugin list`.
+6. If a CLAUDE.md exists at the project root, ask me whether to insert the workflow-routing fragment from `openspec/schemas/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.<locale>.md` (auto-detect locale from existing CLAUDE.md content; default zh-TW for Traditional Chinese, no suffix for English). If I say yes, append the fragment as a new section. If no CLAUDE.md exists, skip.
+7. Clean up the temp directory.
+8. Verify Superpowers plugin is installed by running `claude plugin list`.
    If not listed, run `claude plugin install superpowers@claude-plugins-official`.
-8. Show me the final state.
+9. Show me the final state.
 ```
 
 ### 方法 2:手動 bash(CI / 非 Claude 環境)
@@ -33,11 +34,81 @@ Install the superpowers-bridge schema for OpenSpec into this project:
 ```bash
 git clone https://github.com/JiangWay/openspec-schemas /tmp/oss
 cp -R /tmp/oss/superpowers-bridge ~/your-project/openspec/schemas/superpowers-bridge
+
+# 可選:把 workflow-routing fragment 插進 CLAUDE.md
+# cat /tmp/oss/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.md      # 英文
+# cat /tmp/oss/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.zh-TW.md  # 繁中
+
 rm -rf /tmp/oss
 cd ~/your-project
 openspec schema validate superpowers-bridge
 claude plugin install superpowers@claude-plugins-official  # 若尚未安裝
 ```
+
+---
+
+## 升級已採用本 schema 的專案
+
+如果你的專案早已在 `openspec/schemas/superpowers-bridge/` 安裝過本 schema,並想拿到新版本的文件(例如「進入與離開的判斷」段)與 adopter CLAUDE.md fragment,執行下列其中一種升級方式。
+
+### 升級方法 1:Claude Code 一鍵 prompt(推薦)
+
+在你專案的根目錄打開 Claude Code,把下面這段貼進去:
+
+```
+Upgrade the superpowers-bridge schema in this project:
+
+1. Verify `openspec/schemas/superpowers-bridge/` already exists (upgrade, not fresh install). If missing, abort and tell me to use the install instructions instead.
+2. Clone https://github.com/JiangWay/openspec-schemas to a temp dir.
+3. Show me the diff between the local `openspec/schemas/superpowers-bridge/` and the cloned `superpowers-bridge/` (use `diff -ruN`). Wait for my ack before overwriting.
+4. After my ack, overwrite the local schema dir with the cloned one.
+5. Run `openspec schema validate superpowers-bridge` to verify.
+6. Check whether this project has `CLAUDE.md` at the repo root.
+   - If yes: scan it for an existing workflow-routing section referencing superpowers-bridge.
+     - If found: show me the diff between that section and `superpowers-bridge/templates/adopters/CLAUDE.md.fragment.<locale>.md`. Wait for my ack before replacing.
+     - If not found: ask whether to insert the new fragment from `templates/adopters/CLAUDE.md.fragment.<locale>.md`.
+   - If no CLAUDE.md exists: skip.
+7. Clean up the temp directory.
+8. Show me the final state.
+```
+
+> `<locale>` 預設 `zh-TW`(若你 CLAUDE.md 是繁中)或省略(英文)。Claude 會依你 CLAUDE.md 的既有語言判斷。
+
+### 升級方法 2:手動 bash
+
+```bash
+# 1. 取最新的 bundle
+git clone https://github.com/JiangWay/openspec-schemas /tmp/oss-upgrade
+
+# 2. 先看差異(不直接覆蓋)
+diff -ruN ~/your-project/openspec/schemas/superpowers-bridge /tmp/oss-upgrade/superpowers-bridge
+
+# 3. 確認 diff 後再覆蓋
+rm -rf ~/your-project/openspec/schemas/superpowers-bridge
+cp -R /tmp/oss-upgrade/superpowers-bridge ~/your-project/openspec/schemas/superpowers-bridge
+
+# 4. 驗證
+cd ~/your-project && openspec schema validate superpowers-bridge
+
+# 5. CLAUDE.md fragment(手動處理)
+# 看 /tmp/oss-upgrade/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.zh-TW.md
+# 比對自己 CLAUDE.md 是否要插入或更新對應段落
+
+# 6. 清理
+rm -rf /tmp/oss-upgrade
+```
+
+### 升級會拿到什麼?
+
+| 變動類型 | 內容 | 升級後是否需手動處理 |
+|---|---|---|
+| README 文件 | 新增「進入與離開的判斷」段(本段下方) | 不需 — 純文件,不影響執行 |
+| 新增 `templates/adopters/CLAUDE.md.fragment.*.md` | 給 adopter 複製進自家 CLAUDE.md 的範本 | 看你要不要插入(見上方步驟 6 / prompt 步驟 6) |
+| `schema.yaml` | **未變動** | 不需 — schema graph / instruction 全部 v1 維持不變 |
+
+> 本次升級**不**動 schema.yaml,**不會破壞**現有 change 的中間狀態。如果你正在某個 change 的 brainstorm / design / specs / ... 任一 phase,升級後可以直接繼續推進。
+
+> 未來若 schema.yaml 結構性變動(增刪 artifact、改 PRECHECK 等),會在 README 上方加版本欄位 + 提供 migration guide;v1 → v1.x 的純文件改動不需 migration。
 
 ---
 

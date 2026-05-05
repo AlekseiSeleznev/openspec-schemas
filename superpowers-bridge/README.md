@@ -22,10 +22,11 @@ Install the superpowers-bridge schema for OpenSpec into this project:
 3. Copy the `superpowers-bridge/` subdirectory to `openspec/schemas/superpowers-bridge/`.
 4. Run `openspec schema validate superpowers-bridge` to verify.
 5. Run `openspec schemas` and confirm `superpowers-bridge` is listed.
-6. Clean up the temp directory.
-7. Verify Superpowers plugin is installed by running `claude plugin list`.
+6. If a CLAUDE.md exists at the project root, ask me whether to insert the workflow-routing fragment from `openspec/schemas/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.<locale>.md` (auto-detect locale from existing CLAUDE.md content; default zh-TW for Traditional Chinese, no suffix for English). If I say yes, append the fragment as a new section. If no CLAUDE.md exists, skip.
+7. Clean up the temp directory.
+8. Verify Superpowers plugin is installed by running `claude plugin list`.
    If not listed, run `claude plugin install superpowers@claude-plugins-official`.
-8. Show me the final state.
+9. Show me the final state.
 ```
 
 ### Method 2: Manual bash (CI / non-Claude environments)
@@ -33,11 +34,81 @@ Install the superpowers-bridge schema for OpenSpec into this project:
 ```bash
 git clone https://github.com/JiangWay/openspec-schemas /tmp/oss
 cp -R /tmp/oss/superpowers-bridge ~/your-project/openspec/schemas/superpowers-bridge
+
+# Optional: insert workflow-routing fragment into CLAUDE.md
+# cat /tmp/oss/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.md       # English
+# cat /tmp/oss/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.zh-TW.md # zh-TW
+
 rm -rf /tmp/oss
 cd ~/your-project
 openspec schema validate superpowers-bridge
 claude plugin install superpowers@claude-plugins-official  # if not already
 ```
+
+---
+
+## Upgrading an existing install
+
+If your project already has `openspec/schemas/superpowers-bridge/` and you want to pull the latest version (e.g., to get the new "Entry & exit gates" docs and the adopter CLAUDE.md fragment), use one of the upgrade methods below.
+
+### Upgrade Method 1: Claude Code one-shot prompt (recommended)
+
+In your project root, paste this into Claude Code:
+
+```
+Upgrade the superpowers-bridge schema in this project:
+
+1. Verify `openspec/schemas/superpowers-bridge/` already exists (upgrade, not fresh install). If missing, abort and tell me to use the install instructions instead.
+2. Clone https://github.com/JiangWay/openspec-schemas to a temp dir.
+3. Show me the diff between the local `openspec/schemas/superpowers-bridge/` and the cloned `superpowers-bridge/` (use `diff -ruN`). Wait for my ack before overwriting.
+4. After my ack, overwrite the local schema dir with the cloned one.
+5. Run `openspec schema validate superpowers-bridge` to verify.
+6. Check whether this project has `CLAUDE.md` at the repo root.
+   - If yes: scan it for an existing workflow-routing section referencing superpowers-bridge.
+     - If found: show me the diff between that section and `superpowers-bridge/templates/adopters/CLAUDE.md.fragment.<locale>.md`. Wait for my ack before replacing.
+     - If not found: ask whether to insert the new fragment from `templates/adopters/CLAUDE.md.fragment.<locale>.md`.
+   - If no CLAUDE.md exists: skip.
+7. Clean up the temp directory.
+8. Show me the final state.
+```
+
+> `<locale>` defaults to `zh-TW` if your CLAUDE.md is in Traditional Chinese, or no suffix (English). Claude detects from existing CLAUDE.md content.
+
+### Upgrade Method 2: Manual bash
+
+```bash
+# 1. Get the latest bundle
+git clone https://github.com/JiangWay/openspec-schemas /tmp/oss-upgrade
+
+# 2. Review the diff first (don't overwrite blindly)
+diff -ruN ~/your-project/openspec/schemas/superpowers-bridge /tmp/oss-upgrade/superpowers-bridge
+
+# 3. After reviewing, overwrite
+rm -rf ~/your-project/openspec/schemas/superpowers-bridge
+cp -R /tmp/oss-upgrade/superpowers-bridge ~/your-project/openspec/schemas/superpowers-bridge
+
+# 4. Validate
+cd ~/your-project && openspec schema validate superpowers-bridge
+
+# 5. CLAUDE.md fragment (manual)
+# View /tmp/oss-upgrade/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.md
+# Compare against your CLAUDE.md and insert/update the corresponding section as needed
+
+# 6. Clean up
+rm -rf /tmp/oss-upgrade
+```
+
+### What the upgrade brings
+
+| Change type | Content | Manual action needed? |
+|---|---|---|
+| README docs | New "Entry & exit gates" section (this section's neighbor) | None — pure docs, no runtime effect |
+| New `templates/adopters/CLAUDE.md.fragment.*.md` | Copy-paste fragment for adopters' CLAUDE.md | Optional — see step 6 / prompt step 6 above |
+| `schema.yaml` | **Unchanged** | None — schema graph / instructions remain v1 |
+
+> This upgrade does **NOT** modify `schema.yaml`, so it **does NOT break** any in-flight change's intermediate state. If you're mid-change at any phase (brainstorm / design / specs / ...), you can continue without restarting.
+
+> If a future upgrade modifies `schema.yaml` structurally (artifact add/remove, PRECHECK changes), the README will gain a version field and a migration guide; v1 → v1.x doc-only changes don't need migration.
 
 ---
 
