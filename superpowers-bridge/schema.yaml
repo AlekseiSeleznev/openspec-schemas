@@ -329,6 +329,23 @@ artifacts:
          - Anything else: produce all 6 sections (a placeholder
            "(none observed)" is fine if a section truly has nothing).
 
+      4. **Forward-pointer policy (when facts change after writing)**
+
+         Retrospective.md reflects state at write-time. If
+         subsequent cycles discover that a claim, evidence, or
+         conclusion in this retro was wrong/incomplete:
+
+         - Do NOT rewrite the retrospective (loses audit trail of
+           what was known at the time)
+         - Add a forward-pointer in the retrospective itself:
+           `> **Update YYYY-MM-DD**: section X superseded by
+           <link to follow-up retro / commit / issue>`
+         - The follow-up artifact carries the corrected analysis
+
+         Why: retrospective is evidence-based — its value is
+         capturing what was known and reasoned at a specific point.
+         Rewriting it removes that audit trail.
+
       Write output to retrospective.md using the template structure.
     requires:
       - verify
@@ -356,6 +373,14 @@ apply:
        implementation. The user can install the Superpowers plugin,
        or explicitly opt into the manual fallback path described at
        the end of this instruction.
+
+       Additionally, confirm the project's expected CLI tools are
+       on PATH. The exact list depends on the project — read
+       plan.md and surface any tool mentioned (e.g., `mvn`/`mvnw`,
+       `docker`, `python3`, `jq`, `glab`/`gh`, `node`/`npm`). If
+       a tool is missing, surface as WARNING (not STOP) — the user
+       may have a fallback. Print the missing list once at apply
+       start so the user isn't surprised mid-cycle.
 
     1. **Workspace**: Use the Skill tool to invoke
        **superpowers:using-git-worktrees** to create an isolated
