@@ -14,3 +14,6 @@ npm-debug.log*
 
 # Local test scratch
 /tmp-test/
+
+# Cross-session handoff briefs (ephemeral, never committed)
+/.handoff/
