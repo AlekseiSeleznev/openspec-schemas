@@ -75,6 +75,30 @@ Scenarios 中：
 
 ---
 
+## 6. Front-Door Routing Leak Detector（warning,非阻塞）
+
+設計產出不應落在 `docs/superpowers/specs/`(brainstorm artifact 的
+output redirection 會把它導到 `openspec/changes/<name>/brainstorm.md`)。
+
+偵測:
+
+```bash
+ls docs/superpowers/specs/*.md 2>/dev/null
+```
+
+- [ ] 無檔案,或存在的檔案是 schema 安裝前的合法存留
+
+**洩漏清單**（若有）：
+
+| 檔案 | 內容是否已 captured 進 change | 建議動作 |
+|---|---|---|
+| — | — | — |
+
+> 不會擋住 archive。新的 schema-installed cycle 產生的洩漏,應搬進
+> `openspec/changes/<name>/brainstorm.md` 或 `design.md` 後刪原檔。
+
+---
+
 ## Overall Decision
 
 - [ ] ✅ PASS — 可進入 finishing-a-development-branch 與 archive

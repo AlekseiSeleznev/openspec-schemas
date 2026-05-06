@@ -239,6 +239,26 @@ artifacts:
          committed (no unstaged files in the worktree). Cite the
          commit range if known.
 
+      6. **Front-door routing leak detector** (warning, non-blocking):
+
+         For projects using superpowers-bridge, design output
+         should never land in `docs/superpowers/specs/` — the
+         brainstorm artifact's output redirection (see this
+         schema's brainstorm.instruction) routes it to
+         `openspec/changes/<name>/brainstorm.md`. Run:
+
+           ls docs/superpowers/specs/*.md 2>/dev/null
+
+         If any files exist, record a WARNING: "Front-door routing
+         leak — design output found at docs/superpowers/specs/...;
+         these belong in openspec/changes/<name>/brainstorm.md or
+         design.md. Move/delete after confirming content is captured
+         in the change directory."
+
+         Non-blocking — adopters may have legitimate non-schema use
+         of that directory predating schema install. Surfaces the
+         leak so the user can decide whether to clean up.
+
       Verify MAY be re-run multiple times as the implementation is
       refined — each run overwrites verify.md with current state.
 
