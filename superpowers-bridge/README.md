@@ -2,6 +2,11 @@
 
 [English](./README.md) · [繁體中文](./README.zh-TW.md)
 
+[![Schema Structure](https://github.com/JiangWay/openspec-schemas/actions/workflows/validate-schemas.yml/badge.svg?branch=main)](https://github.com/JiangWay/openspec-schemas/actions/workflows/validate-schemas.yml)
+[![Upstream Drift](https://img.shields.io/github/issues-search/JiangWay/openspec-schemas?query=is%3Aopen%20label%3Aupstream-version-check&label=Upstream%20Drift&color=yellow)](https://github.com/JiangWay/openspec-schemas/issues?q=is%3Aopen+label%3Aupstream-version-check)
+[![OpenSpec baseline](https://img.shields.io/badge/OpenSpec_baseline-1.3.1-0277bd)](#compatibility)
+[![Superpowers baseline](https://img.shields.io/badge/Superpowers_baseline-v5.1.0-0277bd)](#compatibility)
+
 > Bridges [OpenSpec](https://github.com/Fission-AI/OpenSpec)'s artifact governance (the **what**) with [obra/superpowers](https://github.com/obra/superpowers) execution skills (the **how**) into a single workflow. Adds an evidence-first `retrospective` artifact filling a gap Superpowers does not natively cover.
 >
 > The integration lives entirely at the prompt layer — no Superpowers source modified, no OpenSpec CLI changes. Schema version: v1.
@@ -473,22 +478,29 @@ A bundle release `1.x.y` is a published cut of schema major `v1`. A future schem
 
 ## Compatibility
 
-Tested against these upstream versions. CI re-verifies the latest weekly via the [version-check workflow](../.github/workflows/version-check.yml).
+Baseline versions this schema was authored against. This is a **historical snapshot, not an end-to-end compatibility guarantee** — CI cannot run the full prompt-layer workflow in headless mode, so behavioral compatibility relies on human review when drift fires.
 
 Current bundle release: **`1.0.0`** (git tag `v1.0.0`; see [VERSION](./VERSION)).
 
-| superpowers-bridge | OpenSpec CLI | Superpowers plugin | Last verified |
+| superpowers-bridge | OpenSpec CLI | Superpowers plugin | Baseline as of |
 |---|---|---|---|
 | v1 | `1.3.1` | `v5.1.0` | 2026-05-11 |
+
+### How this is checked
+
+The contract is three layers — **baseline declaration + automated drift detection + human review** — not automated compatibility enforcement.
+
+| Layer | Mechanism | Catches | When it fires |
+|---|---|---|---|
+| Structural | [`validate-schemas.yml`](../.github/workflows/validate-schemas.yml) on every push/PR; [`version-check.yml`](../.github/workflows/version-check.yml) weekly against latest OpenSpec | Schema-graph breaks (field renames, removed `requires:` edges, PRECHECK syntax changes) | CI run fails red |
+| Drift notification | [`version-check.yml`](../.github/workflows/version-check.yml) weekly, compares baseline above against latest npm / GitHub release | Pinned ≠ latest upstream | Opens / updates a [labelled drift issue](https://github.com/JiangWay/openspec-schemas/issues?q=is%3Aopen+label%3Aupstream-version-check) for human review (workflow stays green — drift is normal, not a failure) |
+| End-to-end workflow | **Not automated** | Behavioral changes inside Superpowers skills (renames, prose rewrites altering PRECHECK semantics, transitive-dependency changes); subtle OpenSpec engine semantic shifts | A human reads upstream release notes when the drift issue fires |
+
+The "Baseline as of" date is bumped when a maintainer manually re-runs a full cycle against the listed versions and confirms nothing degraded. Until then, the date marks human attestation, not an automated test pass.
 
 ### Known breaking changes
 
 None to date. Future schema-graph structural changes (artifact add/remove, `requires:` edge changes, PRECHECK changes) will be listed here with a migration note.
-
-### What is and isn't auto-detected
-
-- ✅ **Auto-detected** — structural breaks where `openspec schema validate superpowers-bridge` fails against a new OpenSpec CLI release. The [validate-schemas workflow](../.github/workflows/validate-schemas.yml) runs on every push/PR; the [version-check workflow](../.github/workflows/version-check.yml) runs weekly against the latest published versions and opens / updates an issue if the matrix above falls behind or validation breaks.
-- ⚠️ **Not auto-detected** — behavioral changes inside Superpowers skills (skill renames, prose rewrites that alter PRECHECK semantics, transitive-dependency changes). When the version-check workflow sees a new upstream release, the issue prompts a human to read the release notes.
 
 For adopters: pin to versions ≥ those listed above. To inspect your own project's runtime state, run `openspec list` + `openspec schemas` + `claude plugin list`.
 
