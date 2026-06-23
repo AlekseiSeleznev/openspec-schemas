@@ -13,6 +13,10 @@ description: >
   Each artifact / apply step verifies its required skills before
   invoking and surfaces a clear error if any are missing.
   brainstorm → proposal → specs → tasks → plan → verify → retrospective.
+  brainstorm keeps the Superpowers raw dialogue but appends an
+  OpenSpec Capture Summary after a domain-modeling / grilling pass,
+  so proposal and design can consume explicit decisions without
+  depending on free-form transcript structure.
   design is required (reorganizes raw brainstorm output into structured
   Context / Goals / Decisions / Risks / Migration; referenced by tasks
   and plan for implementation guidance).
@@ -22,7 +26,7 @@ description: >
 artifacts:
   - id: brainstorm
     generates: brainstorm.md
-    description: Collaborative design exploration using Superpowers brainstorming
+    description: Collaborative design exploration using Superpowers brainstorming plus OpenSpec capture summary
     template: brainstorm.md
     instruction: |
       PRECHECK — required skill availability:
@@ -34,26 +38,71 @@ artifacts:
 
       Use the Skill tool to invoke **superpowers:brainstorming**.
 
+      Run the brainstorming skill with this OpenSpec-safe hardening
+      layer. Keep the base skill's one-question-at-a-time discipline,
+      approval gates, and user collaboration model, but make the
+      exploration sharper before the design is accepted:
+
+      - **Grilling decision tree**: For every unresolved design fork,
+        ask a direct question, include the recommended answer, and
+        state the trade-off. Walk one branch at a time until the
+        choice is explicit.
+      - **Domain-modeling pass**: Identify domain terms, ownership,
+        identity keys, lifecycle states, invariants, boundary cases,
+        and glossary conflicts. Challenge vague labels until they can
+        be translated into requirements or explicit non-goals.
+      - **Evidence before assumptions**: Inspect project files and
+        relevant official documentation instead of asking the user
+        about facts that can be discovered. Record what evidence was
+        checked.
+      - **TBD discipline**: Remaining unknowns must be explicit TBDs
+        with owner, impact scope, and whether they block proposal,
+        design, specs, or apply.
+
       IMPORTANT output redirection:
       - Do NOT write to `docs/superpowers/specs/`. Instead, write the
         brainstorming output directly to this change's `brainstorm.md`.
-      - brainstorm.md is a RAW CAPTURE — write the brainstorming
-        skill's full output as-is, without forcing any template
-        structure. The skill's natural output is typically a decision
-        log (background → decision chain Q1-Qn → design trade-offs),
-        but the format varies by conversation. Preserve the skill's
+      - brainstorm.md is a RAW CAPTURE with a schema-owned summary
+        footer. First write the brainstorming skill's full output
+        as-is, without forcing the raw portion into a template. The
+        skill's natural output is typically a decision log
+        (background → decision chain Q1-Qn → design trade-offs), but
+        the format varies by conversation. Preserve the skill's
         natural organization.
+      - After the raw capture, append a required
+        `## OpenSpec Capture Summary` section. This section is the
+        normalized bridge from exploratory dialogue to OpenSpec
+        artifacts.
+      - Do NOT create side artifacts such as `CONTEXT.md`, ADRs, or
+        `docs/superpowers/specs/` during brainstorm. If those would
+        be useful, record them as Documentation Candidates in the
+        summary so later artifacts can decide whether to create them.
       - Do NOT pre-fill design.md during this step. design.md is a
         separate artifact that reorganizes brainstorm.md content into
         structured sections (Context, Goals, Decisions, Risks,
         Migration). That transformation happens in the design step.
 
+      Required `## OpenSpec Capture Summary` subsections:
+      - **Evidence Checked**: project files, official docs, MCP/tool
+        lookups, commands, or other sources used to avoid guessing.
+      - **Domain Model**: terms, identities, ownership boundaries,
+        lifecycle states, invariants, and edge cases discovered.
+      - **Grilling Decision Tree**: key questions asked, recommended
+        answers, chosen answers, and trade-offs.
+      - **Resolved Decisions**: decisions ready for proposal/design.
+      - **Rejected Alternatives**: options considered and why rejected.
+      - **Risks / Trade-offs**: risks, mitigations, and accepted costs.
+      - **Documentation Candidates**: ADR, CONTEXT, runbook, or spec
+        candidates to create later, if warranted.
+      - **Validated Direction**: one concise statement of the agreed
+        approach plus acceptance criteria signal.
+
       The brainstorming skill will:
       1. Explore project context
-      2. Ask clarifying questions (one at a time)
+      2. Ask clarifying / grilling questions (one at a time)
       3. Propose 2-3 approaches with trade-offs
       4. Present design sections for approval
-      5. Output the validated design
+      5. Output the validated design and OpenSpec Capture Summary
     requires: []
 
   - id: proposal
@@ -63,7 +112,11 @@ artifacts:
     instruction: |
       Create the proposal document based on the brainstorming output.
 
-      Read brainstorm.md for the validated design. Extract:
+      Read brainstorm.md for the validated design. Prefer the
+      `## OpenSpec Capture Summary` section when present; use the raw
+      capture above it to resolve details, not to reopen decisions.
+
+      Extract:
       - **Why**: The motivation (from brainstorming discussion)
       - **What Changes**: Specific changes agreed upon
       - **Capabilities**: Identify which specs will be created or modified:
@@ -73,6 +126,8 @@ artifacts:
 
       Since brainstorming already explored the problem space,
       this should be a concise extraction, not a new exploration.
+      Preserve any blocking TBDs from the summary rather than hiding
+      them in prose.
 
       IMPORTANT: The Capabilities section is critical. It creates the contract between
       proposal and specs phases. Each capability listed here will need a spec file.
@@ -90,13 +145,20 @@ artifacts:
 
       Read brainstorm.md as input. brainstorm.md is a raw capture of
       the brainstorming skill's output (typically a decision log with
-      Q1-Qn decisions, trade-offs, and context). Your job is to
-      REORGANIZE that content into the structured sections below.
+      Q1-Qn decisions, trade-offs, and context) plus a normalized
+      `## OpenSpec Capture Summary` footer. Prefer the summary for
+      the design skeleton, then use the raw capture for supporting
+      rationale and nuance. Your job is to REORGANIZE that content
+      into the structured sections below.
 
       This is a transformation, not a copy. Extract and restructure:
       - Decisions (Q1-Qn from brainstorm) → design.md §Decisions
       - Background/context → design.md §Context
       - Trade-offs → design.md §Risks / Trade-offs
+      - Domain Model → relevant terms / invariants inside §Context
+        or §Decisions
+      - Documentation Candidates → §Open Questions or follow-up
+        notes only if they affect implementation
       - Add Goals/Non-Goals and Migration Plan (may require
         inference from brainstorm.md content)
 
@@ -110,6 +172,9 @@ artifacts:
 
       Focus on architecture and approach, not line-by-line implementation.
       Good design docs explain the "why" behind technical decisions.
+      Do not create ADRs or CONTEXT.md from design automatically;
+      mention them as follow-up only when the brainstorm summary made
+      the need explicit.
     requires:
       - brainstorm
 

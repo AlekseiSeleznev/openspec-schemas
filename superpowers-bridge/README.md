@@ -2,8 +2,8 @@
 
 [English](./README.md) · [繁體中文](./README.zh-TW.md)
 
-[![Schema Structure](https://github.com/JiangWay/openspec-schemas/actions/workflows/validate-schemas.yml/badge.svg?branch=main)](https://github.com/JiangWay/openspec-schemas/actions/workflows/validate-schemas.yml)
-[![Upstream Drift](https://img.shields.io/github/issues-search/JiangWay/openspec-schemas?query=is%3Aopen%20label%3Aupstream-version-check&label=Upstream%20Drift&color=yellow)](https://github.com/JiangWay/openspec-schemas/issues?q=is%3Aopen+label%3Aupstream-version-check)
+[![Schema Structure](https://github.com/AlekseiSeleznev/openspec-schemas/actions/workflows/validate-schemas.yml/badge.svg?branch=main)](https://github.com/AlekseiSeleznev/openspec-schemas/actions/workflows/validate-schemas.yml)
+[![Upstream Drift](https://img.shields.io/github/issues-search/AlekseiSeleznev/openspec-schemas?query=is%3Aopen%20label%3Aupstream-version-check&label=Upstream%20Drift&color=yellow)](https://github.com/AlekseiSeleznev/openspec-schemas/issues?q=is%3Aopen+label%3Aupstream-version-check)
 [![OpenSpec baseline](https://img.shields.io/badge/OpenSpec_baseline-1.4.1-0277bd)](#compatibility)
 [![Superpowers baseline](https://img.shields.io/badge/Superpowers_baseline-v5.1.0-0277bd)](#compatibility)
 
@@ -15,7 +15,39 @@
 
 ## Install
 
-### Method 1: Claude Code one-shot prompt (recommended)
+OpenSpec resolves schemas in this order:
+
+1. Project-local schema: `<project>/openspec/schemas/<name>/`
+2. User-level schema: `${XDG_DATA_HOME:-$HOME/.local/share}/openspec/schemas/<name>/`
+3. Package built-in schema
+
+Use the user-level method when you want `superpowers-bridge` available to every local project. Use the project-local method when a project needs a pinned or customized copy. A project-local `openspec/schemas/superpowers-bridge/` shadows the user-level install until that local copy is removed or upgraded.
+
+### Method 1: User-level install (all local projects)
+
+```bash
+tmp="$(mktemp -d)"
+git clone https://github.com/AlekseiSeleznev/openspec-schemas "$tmp/openspec-schemas"
+
+schema_home="${XDG_DATA_HOME:-$HOME/.local/share}/openspec/schemas"
+mkdir -p "$schema_home"
+rm -rf "$schema_home/superpowers-bridge"
+cp -R "$tmp/openspec-schemas/superpowers-bridge" "$schema_home/superpowers-bridge"
+
+rm -rf "$tmp"
+openspec schema validate superpowers-bridge
+openspec schemas
+```
+
+After installation, any project can start a change with:
+
+```bash
+/opsx:new my-feature --schema superpowers-bridge
+```
+
+If a project already has `openspec/schemas/superpowers-bridge/`, upgrade that project-local copy too, or remove it if you want the user-level schema to apply.
+
+### Method 2: Project-local Claude Code one-shot prompt
 
 Copy and paste this into Claude Code in your project root:
 
@@ -23,7 +55,7 @@ Copy and paste this into Claude Code in your project root:
 Install the superpowers-bridge schema for OpenSpec into this project:
 
 1. Verify the project has an `openspec/` directory (run `openspec init` if missing).
-2. Clone https://github.com/JiangWay/openspec-schemas to a temp dir.
+2. Clone https://github.com/AlekseiSeleznev/openspec-schemas to a temp dir.
 3. Copy the `superpowers-bridge/` subdirectory to `openspec/schemas/superpowers-bridge/`.
 4. Run `openspec schema validate superpowers-bridge` to verify.
 5. Run `openspec schemas` and confirm `superpowers-bridge` is listed.
@@ -34,10 +66,10 @@ Install the superpowers-bridge schema for OpenSpec into this project:
 9. Show me the final state.
 ```
 
-### Method 2: Manual bash (CI / non-Claude environments)
+### Method 3: Project-local manual bash (CI / non-Claude environments)
 
 ```bash
-git clone https://github.com/JiangWay/openspec-schemas /tmp/oss
+git clone https://github.com/AlekseiSeleznev/openspec-schemas /tmp/oss
 cp -R /tmp/oss/superpowers-bridge ~/your-project/openspec/schemas/superpowers-bridge
 
 # Optional: insert workflow-routing fragment into CLAUDE.md
@@ -54,9 +86,27 @@ claude plugin install superpowers@claude-plugins-official  # if not already
 
 ## Upgrading an existing install
 
-If your project already has `openspec/schemas/superpowers-bridge/` and you want to pull the latest version, use one of the upgrade methods below. The upgrade overwrites the entire `superpowers-bridge/` directory and offers a CLAUDE.md fragment update — see "What the upgrade overwrites" below.
+If you installed the schema user-level, upgrade the user-level directory. If a project already has `openspec/schemas/superpowers-bridge/`, that project-local copy shadows the user-level install and must be upgraded separately or removed.
 
-### Upgrade Method 1: Claude Code one-shot prompt (recommended)
+The upgrade overwrites the entire `superpowers-bridge/` directory and offers a CLAUDE.md fragment update for project-local installs — see "What the upgrade overwrites" below.
+
+### Upgrade Method 1: User-level manual bash
+
+```bash
+tmp="$(mktemp -d)"
+git clone https://github.com/AlekseiSeleznev/openspec-schemas "$tmp/openspec-schemas"
+
+schema_home="${XDG_DATA_HOME:-$HOME/.local/share}/openspec/schemas"
+mkdir -p "$schema_home"
+rm -rf "$schema_home/superpowers-bridge"
+cp -R "$tmp/openspec-schemas/superpowers-bridge" "$schema_home/superpowers-bridge"
+
+rm -rf "$tmp"
+openspec schema validate superpowers-bridge
+openspec schemas
+```
+
+### Upgrade Method 2: Project-local Claude Code one-shot prompt
 
 In your project root, paste this into Claude Code:
 
@@ -64,7 +114,7 @@ In your project root, paste this into Claude Code:
 Upgrade the superpowers-bridge schema in this project:
 
 1. Verify `openspec/schemas/superpowers-bridge/` already exists (upgrade, not fresh install). If missing, abort and tell me to use the install instructions instead.
-2. Clone https://github.com/JiangWay/openspec-schemas to a temp dir.
+2. Clone https://github.com/AlekseiSeleznev/openspec-schemas to a temp dir.
 3. Show me the diff between the local `openspec/schemas/superpowers-bridge/` and the cloned `superpowers-bridge/` (use `diff -ruN`). Wait for my ack before overwriting.
 4. After my ack, overwrite the local schema dir with the cloned one.
 5. Run `openspec schema validate superpowers-bridge` to verify.
@@ -79,11 +129,11 @@ Upgrade the superpowers-bridge schema in this project:
 
 > `<locale>` defaults to `zh-TW` if your CLAUDE.md is in Traditional Chinese, or no suffix (English). Claude detects from existing CLAUDE.md content.
 
-### Upgrade Method 2: Manual bash
+### Upgrade Method 3: Project-local manual bash
 
 ```bash
 # 1. Get the latest bundle
-git clone https://github.com/JiangWay/openspec-schemas /tmp/oss-upgrade
+git clone https://github.com/AlekseiSeleznev/openspec-schemas /tmp/oss-upgrade
 
 # 2. Review the diff first (don't overwrite blindly)
 diff -ruN ~/your-project/openspec/schemas/superpowers-bridge /tmp/oss-upgrade/superpowers-bridge
@@ -107,7 +157,7 @@ rm -rf /tmp/oss-upgrade
 
 | Path | Action | Manual step? |
 |---|---|---|
-| `openspec/schemas/superpowers-bridge/` | Auto-overwritten — entire directory replaced from upstream (`rm -rf` + `cp -R` in Method 2; equivalent in Method 1) | None |
+| `openspec/schemas/superpowers-bridge/` | Auto-overwritten — entire directory replaced from the schema bundle (`rm -rf` + `cp -R` in the project-local manual method; equivalent in the Claude Code prompt) | None |
 | `CLAUDE.md` (project root) | The schema dir ships `templates/adopters/CLAUDE.md.fragment.<locale>.md`; the upgrade procedure diffs your existing CLAUDE.md against this fragment and waits for your ack before inserting / replacing | Yes — review diff, choose insert / replace / keep |
 
 > The bridge directory is monolithic — you take the whole new version or stay on the old one. There is no per-file opt-in. CLAUDE.md is the only project-root file the upgrade ever touches, and never without your ack.
@@ -186,8 +236,8 @@ If any condition is missing, keep brainstorming. When all five hold:
 
 | Anti-pattern | Why it's wrong |
 |---|---|
-| Letting brainstorming write to `docs/superpowers/specs/` after the schema is installed | Bypasses redirection at [schema.yaml](./schema.yaml) lines 35-39; produces orphan artifacts |
-| Letting writing-plans write to `docs/superpowers/plans/` | Same reason (schema.yaml lines 169-171) |
+| Letting brainstorming write to `docs/superpowers/specs/` after the schema is installed | Bypasses the brainstorm redirection instruction in [schema.yaml](./schema.yaml); produces orphan artifacts |
+| Letting writing-plans write to `docs/superpowers/plans/` | Bypasses the plan redirection instruction in [schema.yaml](./schema.yaml); produces orphan artifacts |
 | Promoting to opsx with unresolved blocking TBDs | Those TBDs will block apply phase too — promotion just defers the same problem |
 | Opening a change for bug fix / typo / config tweak | Process ceremony exceeds actual risk; slows delivery without value |
 
@@ -318,6 +368,17 @@ Superpowers skills have default output paths (e.g., brainstorming writes to `doc
 
 Implemented purely via context injection at invocation time, not by modifying skill source.
 
+### Brainstorm hardening
+
+The `brainstorm` artifact still invokes `superpowers:brainstorming` directly, but the schema adds an OpenSpec-safe hardening layer inspired by grilling and domain-modeling workflows:
+
+- Ask one unresolved design-fork question at a time, with a recommended answer and trade-off.
+- Identify domain terms, identities, ownership boundaries, lifecycle states, invariants, edge cases, and glossary conflicts.
+- Inspect project evidence and official documentation before accepting assumptions that can be checked.
+- Mark remaining unknowns as explicit TBDs with owner, impact scope, and blocking phase.
+
+`brainstorm.md` remains a raw capture first. After the raw transcript, the artifact appends `## OpenSpec Capture Summary` with Evidence Checked, Domain Model, Grilling Decision Tree, Resolved Decisions, Rejected Alternatives, Risks / Trade-offs, Documentation Candidates, and Validated Direction. `proposal.md` and `design.md` prefer that summary for structure and use the raw capture for supporting rationale.
+
 ---
 
 ## Usage
@@ -440,6 +501,8 @@ Each artifact / apply step that invokes a Superpowers skill runs a PRECHECK at t
 
 Integration lives entirely in `instruction:` fields (pure prompts). If Superpowers upgrades a skill's behavior, the schema doesn't change. We only touch `schema.yaml` if a skill is renamed or removed.
 
+The brainstorm hardening is also prompt-level integration: no third-party skill is vendored or modified. The schema keeps `superpowers:brainstorming` as the only required brainstorm skill, then asks the model to append an OpenSpec Capture Summary that downstream artifacts can consume deterministically.
+
 ### 3. Transitive dependencies made explicit
 
 TDD and code-review are normally hidden inside `subagent-driven-development`'s SKILL.md. Our schema's apply step 2a instruction lists these two transitive activations explicitly, so a reader can see "what actually happens during apply" at a glance.
@@ -480,7 +543,7 @@ A bundle release `1.x.y` is a published cut of schema major `v1`. A future schem
 
 Baseline versions this schema was authored against. This is a **historical snapshot, not an end-to-end compatibility guarantee** — CI cannot run the full prompt-layer workflow in headless mode, so behavioral compatibility relies on human review when drift fires.
 
-Current bundle release: **`1.0.0`** (git tag `v1.0.0`; see [VERSION](./VERSION)).
+Current bundle release: **`1.1.0`** (see [VERSION](./VERSION)).
 
 | superpowers-bridge | OpenSpec CLI | Superpowers plugin | Baseline as of |
 |---|---|---|---|
@@ -493,7 +556,7 @@ The contract is three layers — **baseline declaration + automated drift detect
 | Layer | Mechanism | Catches | When it fires |
 |---|---|---|---|
 | Structural | [`validate-schemas.yml`](../.github/workflows/validate-schemas.yml) on every push/PR; [`version-check.yml`](../.github/workflows/version-check.yml) weekly against latest OpenSpec | Schema-graph breaks (field renames, removed `requires:` edges, PRECHECK syntax changes) | CI run fails red |
-| Drift notification | [`version-check.yml`](../.github/workflows/version-check.yml) weekly, compares baseline above against latest npm / GitHub release | Pinned ≠ latest upstream | Opens / updates a [labelled drift issue](https://github.com/JiangWay/openspec-schemas/issues?q=is%3Aopen+label%3Aupstream-version-check) for human review (workflow stays green — drift is normal, not a failure) |
+| Drift notification | [`version-check.yml`](../.github/workflows/version-check.yml) weekly, compares baseline above against latest npm / GitHub release | Pinned ≠ latest upstream | Opens / updates a [labelled drift issue](https://github.com/AlekseiSeleznev/openspec-schemas/issues?q=is%3Aopen+label%3Aupstream-version-check) for human review (workflow stays green — drift is normal, not a failure) |
 | End-to-end workflow | **Not automated** | Behavioral changes inside Superpowers skills (renames, prose rewrites altering PRECHECK semantics, transitive-dependency changes); subtle OpenSpec engine semantic shifts | A human reads upstream release notes when the drift issue fires |
 
 The "Baseline as of" date is bumped when a maintainer manually re-runs a full cycle against the listed versions and confirms nothing degraded. Until then, the date marks human attestation, not an automated test pass.

@@ -2,7 +2,7 @@
 
 [English](./README.md) · [繁體中文](./README.zh-TW.md)
 
-Community-contributed [OpenSpec](https://github.com/Fission-AI/OpenSpec) schemas. Each schema is a self-contained bundle that you copy into your project's `openspec/schemas/` directory and select per-change with `--schema <name>`.
+Community-contributed [OpenSpec](https://github.com/Fission-AI/OpenSpec) schemas. Each schema is a self-contained bundle that you can install either into OpenSpec's user-level schema directory for all local projects, or into a project's `openspec/schemas/` directory and select per-change with `--schema <name>`.
 
 ## Bridges in this repository
 
@@ -21,7 +21,7 @@ Benefits:
 
 ## Install
 
-Each bridge directory has its own `README.md` with a copy-paste Claude Code prompt for one-shot installation, plus a manual bash alternative. See e.g. [`superpowers-bridge/README.md#install`](./superpowers-bridge/README.md#install).
+Each bridge directory has its own `README.md` with user-level and project-local installation methods. See e.g. [`superpowers-bridge/README.md#install`](./superpowers-bridge/README.md#install).
 
 ## Roadmap
 

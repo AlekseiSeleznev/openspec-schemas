@@ -2,6 +2,11 @@
 
 <!--
 Background, current state, constraints, stakeholders.
+Prefer brainstorm.md §OpenSpec Capture Summary for structure:
+Evidence Checked, Domain Model, Resolved Decisions, Risks, and
+Validated Direction. Use the raw capture above it for rationale and
+nuance.
+
 brainstorm.md 記錄了探索過程（替代方案 + 選定方向）；
 本檔承接選定方向，展開完整技術設計。
 -->
@@ -18,7 +23,7 @@ brainstorm.md 記錄了探索過程（替代方案 + 選定方向）；
 
 <!--
 所有技術決策的唯一來源（single source of truth）。
-brainstorm.md 的 Agreed Approach 記錄了「選了哪條路」，
+brainstorm.md 的 OpenSpec Capture Summary 記錄了「選了哪條路」，
 本段記錄「那條路上的每個岔口怎麼選的」。
 
 每個決策建議結構：

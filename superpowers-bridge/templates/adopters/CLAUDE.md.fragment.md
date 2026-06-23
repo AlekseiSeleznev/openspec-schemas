@@ -4,13 +4,13 @@
 
 ## Workflow routing (read on session start)
 
-This repo uses [`superpowers-bridge`](https://github.com/JiangWay/openspec-schemas/tree/main/superpowers-bridge) to bridge OpenSpec and Superpowers. Integration rules (language, artifact paths, PRECHECK) follow that bridge's README; this section is the routing guidance for Claude.
+This repo uses [`superpowers-bridge`](https://github.com/AlekseiSeleznev/openspec-schemas/tree/main/superpowers-bridge) to bridge OpenSpec and Superpowers. Integration rules (language, artifact paths, PRECHECK) follow that bridge's README; this section is the routing guidance for Claude.
 
 ### Entry routing
 
 | Trigger you observe | What to do |
 |---|---|
-| User starts a narrative "design discussion / let's brainstorm" | Run verbal `superpowers:brainstorming`, but **do NOT** write to `docs/superpowers/specs/`. Once the conversation converges per the 5 criteria below, promote to `/opsx:propose` |
+| User starts a narrative "design discussion / let's brainstorm" | Run verbal `superpowers:brainstorming` with the same grilling / domain-modeling discipline, but **do NOT** write to `docs/superpowers/specs/` or create side artifacts. Once the conversation converges per the 5 criteria below, promote to `/opsx:propose` |
 | User invokes `/opsx:new` / `/opsx:ff` / `/opsx:propose` directly | Follow the schema's flow; artifact instructions inject at each step |
 | User explicitly says bug fix / typo / config tweak / doc update | Direct PR — **do NOT** open a change (see skip rules below) |
 | User is mid-change | Advance with `/opsx:continue`, `/opsx:apply`, `/opsx:verify`, or `/opsx:archive` |
@@ -34,6 +34,8 @@ All 5 must hold before promoting (any missing → keep brainstorming, **never** 
 4. **Acceptance criteria stateable** — concrete pass conditions (e.g., `./mvnw clean verify` passes + N deliverables)
 5. **Conversation converging** — recent turns are confirmations, not new alternatives
 
+When promoted into opsx, the final brainstorm artifact should include an `## OpenSpec Capture Summary` with evidence checked, domain model, decision tree, resolved decisions, rejected alternatives, risks, documentation candidates, and validated direction.
+
 When all 5 hold → proactively suggest "ready to `/opsx:propose`?" — wait for user ack. Never auto-trigger.
 
 ### Front-door anti-patterns (don't do)
@@ -43,4 +45,4 @@ When all 5 hold → proactively suggest "ready to `/opsx:propose`?" — wait for
 - Promoting to opsx with unresolved blocking TBDs
 - Opening a change for bug fix / typo
 
-Full detail: [superpowers-bridge README §Entry & exit gates](https://github.com/JiangWay/openspec-schemas/blob/main/superpowers-bridge/README.md#entry--exit-gates).
+Full detail: [superpowers-bridge README §Entry & exit gates](https://github.com/AlekseiSeleznev/openspec-schemas/blob/main/superpowers-bridge/README.md#entry--exit-gates).

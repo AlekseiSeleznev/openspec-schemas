@@ -2,7 +2,7 @@
 
 [English](./README.md) · [繁體中文](./README.zh-TW.md)
 
-社群貢獻的 [OpenSpec](https://github.com/Fission-AI/OpenSpec) schema 集合。每個 schema 都是一個自包式 bundle —— 把它複製到你專案的 `openspec/schemas/` 目錄,然後用 `--schema <name>` 在每次 change 個別選擇。
+社群貢獻的 [OpenSpec](https://github.com/Fission-AI/OpenSpec) schema 集合。每個 schema 都是一個自包式 bundle —— 可安裝到 OpenSpec 使用者層級 schema 目錄供本機所有專案使用,也可以複製到你專案的 `openspec/schemas/` 目錄,然後用 `--schema <name>` 在每次 change 個別選擇。
 
 ## 本 repo 提供的 bridges
 
@@ -22,7 +22,7 @@
 
 ## 安裝
 
-每個 bridge 子目錄底下都有自己的 `README.md`,附**複製貼上到 Claude Code 一鍵安裝**的 prompt,以及手動 bash 替代方案。例如 [`superpowers-bridge/README.md#install`](./superpowers-bridge/README.md#install)。
+每個 bridge 子目錄底下都有自己的 `README.md`,提供使用者層級與專案層級安裝方式。例如 [`superpowers-bridge/README.md#install`](./superpowers-bridge/README.md#install)。
 
 ## Roadmap
 

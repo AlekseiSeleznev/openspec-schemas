@@ -2,6 +2,8 @@
 
 <!--
 Explain the motivation for this change. What problem does this solve? Why now?
+Prefer brainstorm.md §OpenSpec Capture Summary when present; use the raw capture
+only to resolve missing rationale.
 
 硬限制：50 ≤ 字元數 ≤ 1000（OpenSpec zod schema 會 validate）
 - 太短：會收到 `Why section must be at least 50 characters` error
@@ -14,6 +16,8 @@ Explain the motivation for this change. What problem does this solve? Why now?
 
 <!--
 Describe what will change. Be specific about new capabilities, modifications, or removals.
+Base this on Resolved Decisions, Rejected Alternatives, Risks / Trade-offs, and
+Validated Direction from brainstorm.md §OpenSpec Capture Summary.
 
 對於有明確前後對比的行為變更，使用 From/To 格式（markdown 無 inline diff）：
 

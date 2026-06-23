@@ -4,13 +4,13 @@
 
 ## 變更工作流(Claude Code 啟動先讀)
 
-本 repo 採用 [`superpowers-bridge`](https://github.com/JiangWay/openspec-schemas/tree/main/superpowers-bridge) 銜接 OpenSpec 與 Superpowers。整合規則(語言、artifact 路徑、PRECHECK)以該 bridge README 為準;以下是給 Claude 的 routing 指引。
+本 repo 採用 [`superpowers-bridge`](https://github.com/AlekseiSeleznev/openspec-schemas/tree/main/superpowers-bridge) 銜接 OpenSpec 與 Superpowers。整合規則(語言、artifact 路徑、PRECHECK)以該 bridge README 為準;以下是給 Claude 的 routing 指引。
 
 ### 入口分流
 
 | 你看到的觸發 | 應該怎麼做 |
 |---|---|
-| 使用者以 narrative 開「設計討論 / 腦力激盪」 | 先 verbal `superpowers:brainstorming`,**不**寫到 `docs/superpowers/specs/`;對話收斂後依下方 5 條判準升級到 `/opsx:propose` |
+| 使用者以 narrative 開「設計討論 / 腦力激盪」 | 先 verbal `superpowers:brainstorming`,並套用同樣的 grilling / domain-modeling 紀律,但**不**寫到 `docs/superpowers/specs/`,也不建立 side artifacts;對話收斂後依下方 5 條判準升級到 `/opsx:propose` |
 | 使用者直接呼叫 `/opsx:new` / `/opsx:ff` / `/opsx:propose` | 走 schema 既定流程;artifact instruction 會在每步注入 |
 | 使用者明確說 bug fix / typo / config 微調 / 文件更新 | 直接 PR,**不**建 change(見下方 skip 規則) |
 | 已經在某個 change 中 | `/opsx:continue` 或 `/opsx:apply` / `/opsx:verify` / `/opsx:archive` 推進 |
@@ -34,6 +34,8 @@
 4. **驗收條件可陳述** —— 具體 pass 條件(例:`./mvnw clean verify` 通過 + N 個成果)
 5. **對話進入收斂** —— 最近幾輪在 confirm 不在發散
 
+升級到 opsx 後,最終 brainstorm artifact 應包含 `## OpenSpec Capture Summary`,列出 evidence checked、domain model、decision tree、resolved decisions、rejected alternatives、risks、documentation candidates 與 validated direction。
+
 全滿足 → 主動建議使用者「要不要 `/opsx:propose`?」,使用者 ack 後落地。永遠不要自動觸發。
 
 ### Front-door 反模式(別做)
@@ -43,4 +45,4 @@
 - TBD 沒收斂就升級到 opsx
 - 對 bug fix / typo 也建 change
 
-詳細見 [superpowers-bridge README §進入與離開的判斷](https://github.com/JiangWay/openspec-schemas/blob/main/superpowers-bridge/README.zh-TW.md#進入與離開的判斷entry--exit-gates)。
+詳細見 [superpowers-bridge README §進入與離開的判斷](https://github.com/AlekseiSeleznev/openspec-schemas/blob/main/superpowers-bridge/README.zh-TW.md#進入與離開的判斷entry--exit-gates)。
