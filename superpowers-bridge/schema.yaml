@@ -12,7 +12,7 @@ description: >
   If your platform lacks subagent support, use spec-driven instead.
   Each artifact / apply step verifies its required skills before
   invoking and surfaces a clear error if any are missing.
-  brainstorm → proposal → specs → tasks → plan → verify → retrospective.
+  brainstorm → proposal → design → specs → tasks → plan → verify → retrospective.
   brainstorm keeps the Superpowers raw dialogue but appends an
   OpenSpec Capture Summary after a domain-modeling / grilling pass,
   so proposal and design can consume explicit decisions without
@@ -143,13 +143,19 @@ artifacts:
     instruction: |
       Create the design document explaining HOW to implement the change.
 
-      Read brainstorm.md as input. brainstorm.md is a raw capture of
-      the brainstorming skill's output (typically a decision log with
-      Q1-Qn decisions, trade-offs, and context) plus a normalized
-      `## OpenSpec Capture Summary` footer. Prefer the summary for
-      the design skeleton, then use the raw capture for supporting
-      rationale and nuance. Your job is to REORGANIZE that content
-      into the structured sections below.
+      Read brainstorm.md as the primary decision source. brainstorm.md
+      is a raw capture of the brainstorming skill's output (typically
+      a decision log with Q1-Qn decisions, trade-offs, and context)
+      plus a normalized `## OpenSpec Capture Summary` footer. Prefer
+      the summary for the design skeleton, then use the raw capture
+      for supporting rationale and nuance.
+
+      Also read proposal.md for scope and capability context. The
+      proposal constrains what is in/out and which capabilities specs
+      will cover; it must NOT reopen decisions already settled in
+      brainstorm.md unless it explicitly preserves a blocking TBD.
+      Your job is to REORGANIZE the accepted brainstorm decisions into
+      the structured sections below.
 
       This is a transformation, not a copy. Extract and restructure:
       - Decisions (Q1-Qn from brainstorm) → design.md §Decisions
@@ -176,7 +182,7 @@ artifacts:
       mention them as follow-up only when the brainstorm summary made
       the need explicit.
     requires:
-      - brainstorm
+      - proposal
 
   - id: specs
     generates: "specs/**/*.md"
@@ -188,6 +194,10 @@ artifacts:
       Create one spec file per capability listed in the proposal's Capabilities section.
       - New capabilities: use the exact kebab-case name from the proposal (specs/<capability>/spec.md).
       - Modified capabilities: use the existing spec folder name from openspec/specs/<capability>/ when creating the delta spec at specs/<capability>/spec.md.
+
+      Read design.md before writing specs so requirements stay aligned
+      with accepted constraints and architectural decisions. Specs
+      still define WHAT the system SHALL do, not implementation steps.
 
       Delta operations (use ## headers):
       - **ADDED Requirements**: New capabilities
@@ -205,6 +215,7 @@ artifacts:
       Specs should be testable - each scenario is a potential test case.
     requires:
       - proposal
+      - design
 
   - id: tasks
     generates: tasks.md

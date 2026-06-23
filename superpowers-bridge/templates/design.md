@@ -5,7 +5,9 @@ Background, current state, constraints, stakeholders.
 Prefer brainstorm.md §OpenSpec Capture Summary for structure:
 Evidence Checked, Domain Model, Resolved Decisions, Risks, and
 Validated Direction. Use the raw capture above it for rationale and
-nuance.
+nuance. Read proposal.md for scope and capability context only; do
+not reopen decisions settled in brainstorm.md unless proposal.md
+preserves a blocking TBD.
 
 brainstorm.md 記錄了探索過程（替代方案 + 選定方向）；
 本檔承接選定方向，展開完整技術設計。

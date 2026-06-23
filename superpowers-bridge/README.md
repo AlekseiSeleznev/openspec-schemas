@@ -162,9 +162,9 @@ rm -rf /tmp/oss-upgrade
 
 > The bridge directory is monolithic — you take the whole new version or stay on the old one. There is no per-file opt-in. CLAUDE.md is the only project-root file the upgrade ever touches, and never without your ack.
 
-> In-flight changes (any phase: brainstorm / design / specs / ...) remain valid because the schema graph (`requires:` edges, PRECHECKs, artifact dependencies) hasn't changed in v1.x. Existing `verify.md` / `retrospective.md` from before the upgrade are still readable; if you re-run `/opsx:verify` or `/opsx:continue → retrospective` on them, the new template structure applies on overwrite.
+> In-flight changes remain valid across the v1.1.1 graph tightening. If `brainstorm.md` exists but `proposal.md` does not, `/opsx:continue` now unlocks only `proposal.md`; `design.md` follows after `proposal.md`. Existing `design.md`, `verify.md`, and `retrospective.md` files remain readable.
 
-> If a future upgrade modifies the schema graph structurally (artifact add/remove, `requires:` edge changes, PRECHECK changes), the README will gain a version field and a migration guide. v1 → v1.x prose-only changes are safe and do not need migration.
+> Future schema graph changes (artifact add/remove, `requires:` edge changes, PRECHECK changes) are listed under "Known schema graph changes" below. Prose-only v1.x instruction updates remain safe and do not need migration.
 
 ---
 
@@ -248,9 +248,7 @@ If any condition is missing, keep brainstorming. When all five hold:
 ### Artifact DAG
 
 ```text
-brainstorm ──┬──→ proposal ──→ specs ──┐
-             │                         ├──→ tasks ──→ plan ──→ [apply] ──→ verify ──→ retrospective
-             └──→ design ──────────────┘
+brainstorm ──→ proposal ──→ design ──→ specs ──→ tasks ──→ plan ──→ [apply] ──→ verify ──→ retrospective
 ```
 
 Differences from `spec-driven`:
@@ -266,7 +264,7 @@ Differences from `spec-driven`:
 
 ### Lifecycle (apply orchestration + timing notes)
 
-The Artifact DAG above shows **file-existence** dependencies. The runtime lifecycle below adds the apply phase's ordered steps and the **timing offsets** between graph edges and actual production order.
+The Artifact DAG above shows **file-existence** dependencies. Planning artifacts are intentionally serial: `proposal.md` scopes the change before `design.md`, and both files must exist before `specs/**/*.md`. The runtime lifecycle below adds the apply phase's ordered steps and the **timing offsets** for post-apply artifacts.
 
 ```mermaid
 flowchart TD
@@ -282,8 +280,9 @@ flowchart TD
         PL["<b>plan.md</b><br/><i>superpowers:writing-plans</i>"]
 
         BS --> PROP
-        BS --> DES
-        PROP --> SP
+        PROP --> DES
+        PROP -. capabilities .-> SP
+        DES --> SP
         SP --> TK
         DES --> TK
         TK --> PL
@@ -321,9 +320,7 @@ ASCII fallback (CLI-readable):
 
 ```text
 PLANNING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  brainstorm.md ──┬─→ proposal.md ──→ specs/**/*.md ──┐
-                  │                                   ├─→ tasks.md ──→ plan.md
-                  └─→ design.md (required) ───────────┘
+  brainstorm.md ──→ proposal.md ──→ design.md (required) ──→ specs/**/*.md ──→ tasks.md ──→ plan.md
                                                                        │
                           apply.requires: [plan], apply.tracks: tasks  ▼
 APPLY ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -339,9 +336,10 @@ APPLY ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 > **Timing notes** (full rationale in "Six design touches" #6):
+> - Planning order is enforced by `requires:` edges: `design.requires: [proposal]`, and `specs.requires: [proposal, design]`.
 > - `verify.md` declares `requires: plan` in the graph but is actually produced inside apply step 3.
 > - `retrospective.md` declares `requires: verify` and per Step 4 is produced **before** the PR opens — so the PR diff includes the complete archived cycle (all artifacts done, spec synced, change folder under `archive/`).
-> - The `requires:` edges are file-existence dependencies for OpenSpec's graph engine; runtime ordering lives in instruction prose.
+> - The remaining timing mismatch is post-apply only; planning order no longer depends on `/opsx:continue` choosing among parallel ready artifacts.
 
 ### Seven Superpowers touchpoints
 
@@ -377,7 +375,7 @@ The `brainstorm` artifact still invokes `superpowers:brainstorming` directly, bu
 - Inspect project evidence and official documentation before accepting assumptions that can be checked.
 - Mark remaining unknowns as explicit TBDs with owner, impact scope, and blocking phase.
 
-`brainstorm.md` remains a raw capture first. After the raw transcript, the artifact appends `## OpenSpec Capture Summary` with Evidence Checked, Domain Model, Grilling Decision Tree, Resolved Decisions, Rejected Alternatives, Risks / Trade-offs, Documentation Candidates, and Validated Direction. `proposal.md` and `design.md` prefer that summary for structure and use the raw capture for supporting rationale.
+`brainstorm.md` remains a raw capture first. After the raw transcript, the artifact appends `## OpenSpec Capture Summary` with Evidence Checked, Domain Model, Grilling Decision Tree, Resolved Decisions, Rejected Alternatives, Risks / Trade-offs, Documentation Candidates, and Validated Direction. `proposal.md` prefers that summary for scope and capabilities. `design.md` still uses `brainstorm.md` as the primary decision source, and reads `proposal.md` only for scope / capability context.
 
 ---
 
@@ -543,7 +541,7 @@ A bundle release `1.x.y` is a published cut of schema major `v1`. A future schem
 
 Baseline versions this schema was authored against. This is a **historical snapshot, not an end-to-end compatibility guarantee** — CI cannot run the full prompt-layer workflow in headless mode, so behavioral compatibility relies on human review when drift fires.
 
-Current bundle release: **`1.1.0`** (see [VERSION](./VERSION)).
+Current bundle release: **`1.1.1`** (see [VERSION](./VERSION)).
 
 | superpowers-bridge | OpenSpec CLI | Superpowers plugin | Baseline as of |
 |---|---|---|---|
@@ -561,9 +559,9 @@ The contract is three layers — **baseline declaration + automated drift detect
 
 The "Baseline as of" date is bumped when a maintainer manually re-runs a full cycle against the listed versions and confirms nothing degraded. Until then, the date marks human attestation, not an automated test pass.
 
-### Known breaking changes
+### Known schema graph changes
 
-None to date. Future schema-graph structural changes (artifact add/remove, `requires:` edge changes, PRECHECK changes) will be listed here with a migration note.
+- **v1.1.1** — tightened planning order to match the documented lifecycle: `design.requires` changed from `[brainstorm]` to `[proposal]`, and `specs.requires` changed from `[proposal]` to `[proposal, design]`. Migration: no file rewrite is required. In-flight changes continue by creating any missing predecessor first.
 
 For adopters: pin to versions ≥ those listed above. To inspect your own project's runtime state, run `openspec list` + `openspec schemas` + `claude plugin list`.
 
