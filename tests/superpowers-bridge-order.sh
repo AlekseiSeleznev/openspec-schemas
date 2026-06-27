@@ -42,12 +42,72 @@ openspec new change "$change_name" --schema superpowers-bridge >/dev/null
 
 assert_ready_only "new change" "brainstorm"
 
+brainstorm_instruction="$(openspec instructions brainstorm --change "$change_name" --json \
+  | jq -r '.instruction')"
+if ! grep -q "Clarification Gate" <<<"$brainstorm_instruction"; then
+  fail "brainstorm instruction must require the Clarification Gate"
+fi
+if grep -q "explicitly opt to write brainstorm.md manually" <<<"$brainstorm_instruction"; then
+  fail "brainstorm instruction must not offer manual fallback"
+fi
+proposal_instruction="$(openspec instructions proposal --change "$change_name" --json \
+  | jq -r '.instruction')"
+if ! grep -q "lacks a closed Clarification Gate" <<<"$proposal_instruction"; then
+  fail "proposal instruction must stop on a missing Clarification Gate"
+fi
+
 cat > "openspec/changes/$change_name/brainstorm.md" <<'EOF'
 # Brainstorm
 
 ## OpenSpec Capture Summary
 
-- Validated Direction: deterministic artifact order.
+### Clarification Gate
+
+| Check | Status | Evidence |
+|---|---|---|
+| Scope locked | yes | Order-only fixture scope is fixed. |
+| Domain model clear | yes | Artifact order is the only domain term. |
+| Major design forks resolved | yes | Use schema requires edges. |
+| Capabilities identifiable | yes | artifact-order |
+| Acceptance criteria stateable | yes | Ready artifacts advance one at a time. |
+| Blocking TBDs remaining | none | No blocker remains for this fixture. |
+| User-approved direction | yes | Fixture represents accepted deterministic order. |
+
+### Evidence Checked
+
+- schema fixture copied from the repository under test.
+
+### Domain Model
+
+- Artifact order: deterministic sequence enforced by requires edges.
+
+### Grilling Decision Tree
+
+- Q: Can design unlock before proposal? A: No; proposal must precede design.
+
+### Resolved Decisions
+
+- Enforce proposal before design.
+
+### Rejected Alternatives
+
+- Parallel proposal/design after brainstorm.
+
+### Risks / Trade-offs
+
+- None for the order fixture.
+
+### Non-Blocking TBDs
+
+None.
+
+### Documentation Candidates
+
+None.
+
+### Validated Direction
+
+Deterministic artifact order.
 EOF
 
 assert_ready_only "after brainstorm" "proposal"

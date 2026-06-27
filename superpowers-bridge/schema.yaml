@@ -32,9 +32,8 @@ artifacts:
       PRECHECK — required skill availability:
       Before invoking, confirm `superpowers:brainstorming` appears in
       your available skills list. If missing, STOP and inform the user
-      that the Superpowers plugin must be installed (or that they can
-      explicitly opt to write brainstorm.md manually using the template
-      below). Do NOT silently fall back.
+      that the Superpowers plugin must be installed. Do NOT write
+      brainstorm.md manually and do NOT silently fall back.
 
       Use the Skill tool to invoke **superpowers:brainstorming**.
 
@@ -43,6 +42,12 @@ artifacts:
       approval gates, and user collaboration model, but make the
       exploration sharper before the design is accepted:
 
+      - **Mandatory clarification gate**: Keep asking one direct
+        clarifying / grilling question at a time until all
+        decision-relevant details are explicitly resolved. Do NOT write
+        brainstorm.md while any gate item is `no`, `unknown`, or
+        unresolved. If the gate is not closed, STOP artifact creation
+        and ask the next question.
       - **Grilling decision tree**: For every unresolved design fork,
         ask a direct question, include the recommended answer, and
         state the trade-off. Walk one branch at a time until the
@@ -55,13 +60,21 @@ artifacts:
         relevant official documentation instead of asking the user
         about facts that can be discovered. Record what evidence was
         checked.
-      - **TBD discipline**: Remaining unknowns must be explicit TBDs
-        with owner, impact scope, and whether they block proposal,
-        design, specs, or apply.
+      - **Blocking TBD discipline**: Blocking TBDs are not allowed at
+        brainstorm completion. A blocking TBD is any unknown that can
+        change scope, capability list, domain model, accepted approach,
+        architecture boundary, data / API contract, migration,
+        implementation plan, verification, or apply safety. Continue
+        asking questions until these are resolved. Non-blocking TBDs
+        may remain only when recorded with owner, impact scope, reason
+        they do not block downstream artifacts, and blocking phase
+        `none`.
 
       IMPORTANT output redirection:
       - Do NOT write to `docs/superpowers/specs/`. Instead, write the
         brainstorming output directly to this change's `brainstorm.md`.
+      - Only write brainstorm.md after the Clarification Gate is closed
+        and the user has explicitly approved the validated direction.
       - brainstorm.md is a RAW CAPTURE with a schema-owned summary
         footer. First write the brainstorming skill's full output
         as-is, without forcing the raw portion into a template. The
@@ -83,6 +96,11 @@ artifacts:
         Migration). That transformation happens in the design step.
 
       Required `## OpenSpec Capture Summary` subsections:
+      - **Clarification Gate**: scope locked, domain model clear,
+        major design forks resolved, capabilities identifiable,
+        acceptance criteria stateable, blocking TBDs remaining `none`,
+        and user-approved direction. If any item is not satisfied,
+        brainstorm is not complete.
       - **Evidence Checked**: project files, official docs, MCP/tool
         lookups, commands, or other sources used to avoid guessing.
       - **Domain Model**: terms, identities, ownership boundaries,
@@ -92,6 +110,9 @@ artifacts:
       - **Resolved Decisions**: decisions ready for proposal/design.
       - **Rejected Alternatives**: options considered and why rejected.
       - **Risks / Trade-offs**: risks, mitigations, and accepted costs.
+      - **Non-Blocking TBDs**: remaining unknowns, if any, with owner,
+        impact scope, why they do not block proposal/design/specs/
+        tasks/plan/apply, and blocking phase `none`.
       - **Documentation Candidates**: ADR, CONTEXT, runbook, or spec
         candidates to create later, if warranted.
       - **Validated Direction**: one concise statement of the agreed
@@ -99,10 +120,12 @@ artifacts:
 
       The brainstorming skill will:
       1. Explore project context
-      2. Ask clarifying / grilling questions (one at a time)
+      2. Ask clarifying / grilling questions (one at a time) until the
+         Clarification Gate is closed
       3. Propose 2-3 approaches with trade-offs
       4. Present design sections for approval
-      5. Output the validated design and OpenSpec Capture Summary
+      5. Output the validated design and OpenSpec Capture Summary only
+         after explicit user approval
     requires: []
 
   - id: proposal
@@ -126,8 +149,11 @@ artifacts:
 
       Since brainstorming already explored the problem space,
       this should be a concise extraction, not a new exploration.
-      Preserve any blocking TBDs from the summary rather than hiding
-      them in prose.
+      If brainstorm.md lacks a closed Clarification Gate, or says any
+      blocking TBD remains, STOP and return to brainstorm; proposal.md
+      must not be created from an incomplete Clarification Gate.
+      Preserve non-blocking TBDs only when they are explicitly
+      classified in the summary.
 
       IMPORTANT: The Capabilities section is critical. It creates the contract between
       proposal and specs phases. Each capability listed here will need a spec file.
@@ -153,7 +179,10 @@ artifacts:
       Also read proposal.md for scope and capability context. The
       proposal constrains what is in/out and which capabilities specs
       will cover; it must NOT reopen decisions already settled in
-      brainstorm.md unless it explicitly preserves a blocking TBD.
+      brainstorm.md. If brainstorm.md lacks a closed Clarification
+      Gate, or proposal.md / brainstorm.md says any blocking TBD
+      remains, STOP and return to brainstorm/proposal; design.md must
+      not be created from an incomplete Clarification Gate.
       Your job is to REORGANIZE the accepted brainstorm decisions into
       the structured sections below.
 

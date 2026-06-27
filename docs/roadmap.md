@@ -1,33 +1,32 @@
 # Roadmap
 
-[English](./roadmap.md) · [繁體中文](./roadmap.zh-TW.md)
+Репозиторий поддерживается как side project. Этот roadmap описывает актуальное направление, но не является контрактом: порядок и состав задач могут меняться по итогам реального использования.
 
-This repository is actively maintained as a side project. The roadmap below sketches what's planned but isn't a contract — items can shift based on what real usage surfaces.
+## v1 - выпущено
 
-## v1 — Released
+- [x] **`superpowers-bridge`** - bridge OpenSpec <-> obra/superpowers с native artifact `retrospective`.
 
-- [x] **`superpowers-bridge`** — bridges OpenSpec ↔ obra/superpowers + native `retrospective` artifact
+## v1.x - follow-up backlog
 
-## v1.x — In follow-up backlog
+Эти пункты выросли из исходного implementation plan и последующих правок:
 
-These items are tracked in `~/.claude/plans/pr-quizzical-oasis.md` (the implementation plan):
+- [ ] **Упаковка `workflow-retrospective` как skill** - сейчас процедура retrospective встроена в schema instruction. Если пользователям понадобится вызывать `/workflow-retrospective` интерактивно вне schema flow, ее можно вынести в Claude Code plugin.
+- [ ] **End-to-end CI integration test** - текущий CI запускает только `openspec schema validate`. Round-trip test от `/opsx:new` до `/opsx:archive` ловил бы больше regressions, но требует Superpowers в CI.
+- [ ] **Полировка verify artifact** - ясность template, optional handling для design, worktree origin, критерии PASS и заметки по TDD.
+- [ ] **Наблюдение за `/opsx:continue` ordering** - после graph tightening порядок planning artifact enforced через `requires:`. Если OpenSpec изменит порядок `status --json`, skill должен продолжать выбирать artifact по порядку schema lifecycle.
 
-- [ ] **`workflow-retrospective` skill packaging** — currently the retrospective procedure is embedded in the schema instruction (Decision 3). If real users need to invoke `/workflow-retrospective` interactively (outside the schema flow), repackage as a Claude Code plugin
-- [ ] **End-to-end CI integration test** — current CI only runs `openspec schema validate`. A round-trip test (`/opsx:new` through `/opsx:archive`) would catch regressions but requires Superpowers in CI
-- [ ] **Verify artifact 5 polish points** — listed in v1.1 backlog A (templates clarity, design optional handling, worktree origin, pass criteria, TDD note)
+## Ждем OpenSpec core
 
-## Awaiting OpenSpec core
+Эти пункты невозможно надежно решить только community-схемой:
 
-These cannot be solved in a community schema:
+- [ ] **Поле `requires_skills:` в schema** - заменило бы prompt-level PRECHECK на engine-validated declarations.
+- [ ] **`post_apply` phase** - позволил бы сделать `verify` и `retrospective` настоящими post-apply hooks вместо artifacts с timing mismatch, аналогично `after_implement` в spec-kit.
 
-- [ ] **`requires_skills:` schema field** — would replace the prompt PRECHECKs with engine-validated declarations
-- [ ] **`post_apply` phase** — would let `verify` and `retrospective` be true post-apply hooks instead of artifacts with timing-mismatch (analogous to spec-kit's `after_implement`)
+## Возможные будущие bridge
 
-## Future bridge candidates
+Если появится реальный спрос:
 
-When real demand surfaces:
+- [ ] **`obra-bridge`** - более широкая интеграция с другими инструментами `obra/*`.
+- [ ] **Domain-specific schemas** - например, вариант `data-pipeline` с усиленными artifacts для schema validation.
 
-- [ ] **`obra-bridge`** — broader integration with other obra/* tools (if the user community grows)
-- [ ] **Domain-specific schemas** — e.g., a `data-pipeline` schema variant with stronger schema-validation artifacts
-
-Want to suggest a bridge? Open an issue at <https://github.com/JiangWay/openspec-schemas/issues>.
+Предложения по bridge лучше оформлять issue: <https://github.com/AlekseiSeleznev/openspec-schemas/issues>.

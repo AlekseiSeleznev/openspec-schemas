@@ -1,29 +1,25 @@
 # superpowers-bridge Schema
 
-[English](./README.md) · [繁體中文](./README.zh-TW.md)
-
 [![Schema Structure](https://github.com/AlekseiSeleznev/openspec-schemas/actions/workflows/validate-schemas.yml/badge.svg?branch=main)](https://github.com/AlekseiSeleznev/openspec-schemas/actions/workflows/validate-schemas.yml)
 [![Upstream Drift](https://img.shields.io/github/issues-search/AlekseiSeleznev/openspec-schemas?query=is%3Aopen%20label%3Aupstream-version-check&label=Upstream%20Drift&color=yellow)](https://github.com/AlekseiSeleznev/openspec-schemas/issues?q=is%3Aopen+label%3Aupstream-version-check)
-[![OpenSpec baseline](https://img.shields.io/badge/OpenSpec_baseline-1.4.1-0277bd)](#compatibility)
-[![Superpowers baseline](https://img.shields.io/badge/Superpowers_baseline-v5.1.0-0277bd)](#compatibility)
+[![OpenSpec baseline](https://img.shields.io/badge/OpenSpec_baseline-1.4.1-0277bd)](#совместимость)
+[![Superpowers baseline](https://img.shields.io/badge/Superpowers_baseline-v5.1.0-0277bd)](#совместимость)
 
-> Bridges [OpenSpec](https://github.com/Fission-AI/OpenSpec)'s artifact governance (the **what**) with [obra/superpowers](https://github.com/obra/superpowers) execution skills (the **how**) into a single workflow. Adds an evidence-first `retrospective` artifact filling a gap Superpowers does not natively cover.
->
-> The integration lives entirely at the prompt layer — no Superpowers source modified, no OpenSpec CLI changes. Schema version: v1.
+`superpowers-bridge` соединяет artifact governance [OpenSpec](https://github.com/Fission-AI/OpenSpec) с execution skills из [obra/superpowers](https://github.com/obra/superpowers). OpenSpec отвечает за "что должно быть описано и проверено", Superpowers - за "как дисциплинированно выполнить работу". Интеграция живет на prompt layer: исходники Superpowers и OpenSpec CLI не патчатся.
 
----
+Schema version: `v1`. Current bundle release: `1.1.2` (см. [VERSION](./VERSION)).
 
-## Install
+## Установка
 
-OpenSpec resolves schemas in this order:
+OpenSpec ищет schemas в таком порядке:
 
 1. Project-local schema: `<project>/openspec/schemas/<name>/`
 2. User-level schema: `${XDG_DATA_HOME:-$HOME/.local/share}/openspec/schemas/<name>/`
 3. Package built-in schema
 
-Use the user-level method when you want `superpowers-bridge` available to every local project. Use the project-local method when a project needs a pinned or customized copy. A project-local `openspec/schemas/superpowers-bridge/` shadows the user-level install until that local copy is removed or upgraded.
+User-level установка подходит, если `superpowers-bridge` нужен во всех локальных проектах. Project-local установка подходит, если проект должен зафиксировать или кастомизировать копию schema. Локальный каталог `openspec/schemas/superpowers-bridge/` всегда перекрывает user-level установку.
 
-### Method 1: User-level install (all local projects)
+### Способ 1: user-level install
 
 ```bash
 tmp="$(mktemp -d)"
@@ -39,19 +35,19 @@ openspec schema validate superpowers-bridge
 openspec schemas
 ```
 
-After installation, any project can start a change with:
+После установки change можно открыть так:
 
 ```bash
 /opsx:new my-feature --schema superpowers-bridge
 ```
 
-If a project already has `openspec/schemas/superpowers-bridge/`, upgrade that project-local copy too, or remove it if you want the user-level schema to apply.
+Если в проекте уже есть `openspec/schemas/superpowers-bridge/`, обновите эту project-local копию или удалите ее, чтобы сработала user-level schema.
 
-### Method 2: Project-local Claude Code one-shot prompt
+### Способ 2: project-local Claude Code prompt
 
-Copy and paste this into Claude Code in your project root:
+Вставьте в Claude Code из корня проекта:
 
-```
+```text
 Install the superpowers-bridge schema for OpenSpec into this project:
 
 1. Verify the project has an `openspec/` directory (run `openspec init` if missing).
@@ -59,22 +55,21 @@ Install the superpowers-bridge schema for OpenSpec into this project:
 3. Copy the `superpowers-bridge/` subdirectory to `openspec/schemas/superpowers-bridge/`.
 4. Run `openspec schema validate superpowers-bridge` to verify.
 5. Run `openspec schemas` and confirm `superpowers-bridge` is listed.
-6. If a CLAUDE.md exists at the project root, ask me whether to insert the workflow-routing fragment from `openspec/schemas/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.<locale>.md` (auto-detect locale from existing CLAUDE.md content; default zh-TW for Traditional Chinese, no suffix for English). If I say yes, append the fragment as a new section. If no CLAUDE.md exists, skip.
+6. If a CLAUDE.md exists at the project root, ask me whether to insert the workflow-routing fragment from `openspec/schemas/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.md`. If I say yes, append the fragment as a new section. If no CLAUDE.md exists, skip.
 7. Clean up the temp directory.
 8. Verify Superpowers plugin is installed by running `claude plugin list`.
    If not listed, run `claude plugin install superpowers@claude-plugins-official`.
 9. Show me the final state.
 ```
 
-### Method 3: Project-local manual bash (CI / non-Claude environments)
+### Способ 3: project-local manual bash
 
 ```bash
 git clone https://github.com/AlekseiSeleznev/openspec-schemas /tmp/oss
 cp -R /tmp/oss/superpowers-bridge ~/your-project/openspec/schemas/superpowers-bridge
 
 # Optional: insert workflow-routing fragment into CLAUDE.md
-# cat /tmp/oss/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.md       # English
-# cat /tmp/oss/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.zh-TW.md # zh-TW
+# cat /tmp/oss/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.md
 
 rm -rf /tmp/oss
 cd ~/your-project
@@ -82,15 +77,11 @@ openspec schema validate superpowers-bridge
 claude plugin install superpowers@claude-plugins-official  # if not already
 ```
 
----
+## Обновление существующей установки
 
-## Upgrading an existing install
+User-level установку обновляют заменой `${XDG_DATA_HOME:-$HOME/.local/share}/openspec/schemas/superpowers-bridge`. Project-local копию нужно обновлять отдельно, потому что она перекрывает user-level schema.
 
-If you installed the schema user-level, upgrade the user-level directory. If a project already has `openspec/schemas/superpowers-bridge/`, that project-local copy shadows the user-level install and must be upgraded separately or removed.
-
-The upgrade overwrites the entire `superpowers-bridge/` directory and offers a CLAUDE.md fragment update for project-local installs — see "What the upgrade overwrites" below.
-
-### Upgrade Method 1: User-level manual bash
+### User-level upgrade
 
 ```bash
 tmp="$(mktemp -d)"
@@ -106,499 +97,310 @@ openspec schema validate superpowers-bridge
 openspec schemas
 ```
 
-### Upgrade Method 2: Project-local Claude Code one-shot prompt
-
-In your project root, paste this into Claude Code:
-
-```
-Upgrade the superpowers-bridge schema in this project:
-
-1. Verify `openspec/schemas/superpowers-bridge/` already exists (upgrade, not fresh install). If missing, abort and tell me to use the install instructions instead.
-2. Clone https://github.com/AlekseiSeleznev/openspec-schemas to a temp dir.
-3. Show me the diff between the local `openspec/schemas/superpowers-bridge/` and the cloned `superpowers-bridge/` (use `diff -ruN`). Wait for my ack before overwriting.
-4. After my ack, overwrite the local schema dir with the cloned one.
-5. Run `openspec schema validate superpowers-bridge` to verify.
-6. Check whether this project has `CLAUDE.md` at the repo root.
-   - If yes: scan it for an existing workflow-routing section referencing superpowers-bridge.
-     - If found: show me the diff between that section and `superpowers-bridge/templates/adopters/CLAUDE.md.fragment.<locale>.md`. Wait for my ack before replacing.
-     - If not found: ask whether to insert the new fragment from `templates/adopters/CLAUDE.md.fragment.<locale>.md`.
-   - If no CLAUDE.md exists: skip.
-7. Clean up the temp directory.
-8. Show me the final state.
-```
-
-> `<locale>` defaults to `zh-TW` if your CLAUDE.md is in Traditional Chinese, or no suffix (English). Claude detects from existing CLAUDE.md content.
-
-### Upgrade Method 3: Project-local manual bash
+### Project-local upgrade
 
 ```bash
-# 1. Get the latest bundle
 git clone https://github.com/AlekseiSeleznev/openspec-schemas /tmp/oss-upgrade
 
-# 2. Review the diff first (don't overwrite blindly)
+# Review before overwrite
 diff -ruN ~/your-project/openspec/schemas/superpowers-bridge /tmp/oss-upgrade/superpowers-bridge
 
-# 3. After reviewing, overwrite
+# After explicit approval
 rm -rf ~/your-project/openspec/schemas/superpowers-bridge
 cp -R /tmp/oss-upgrade/superpowers-bridge ~/your-project/openspec/schemas/superpowers-bridge
 
-# 4. Validate
 cd ~/your-project && openspec schema validate superpowers-bridge
 
-# 5. CLAUDE.md fragment (manual)
+# CLAUDE.md fragment, handled manually
 # View /tmp/oss-upgrade/superpowers-bridge/templates/adopters/CLAUDE.md.fragment.md
-# Compare against your CLAUDE.md and insert/update the corresponding section as needed
+# Compare with your existing CLAUDE.md before inserting or replacing.
 
-# 6. Clean up
 rm -rf /tmp/oss-upgrade
 ```
 
-### What the upgrade overwrites
+Upgrade заменяет весь каталог `openspec/schemas/superpowers-bridge/`. Это monolithic bundle: либо берется весь новый bridge, либо остается старая копия. Project root `CLAUDE.md` обновляется только вручную или после явного подтверждения пользователя.
 
-| Path | Action | Manual step? |
+In-flight changes совместимы с graph tightening `v1.1.1`: если уже есть `brainstorm.md`, но нет `proposal.md`, `/opsx:continue` должен разблокировать только `proposal.md`; `design.md` следует после `proposal.md`. Уже созданные `design.md`, `verify.md` и `retrospective.md` остаются читаемыми.
+
+Для `v1.1.2` новые `brainstorm.md` должны содержать закрытый Clarification Gate. Если in-flight change уже имеет старый `brainstorm.md` без gate, `proposal` / `design` instructions должны остановиться и вернуть работу в brainstorm до явного закрытия gate.
+
+## Что решает schema
+
+Без bridge OpenSpec и Superpowers дублируют друг друга:
+
+1. Brainstorming пишет дизайн в `docs/superpowers/specs/`, а OpenSpec заново создает `proposal.md` / `design.md`.
+2. `tasks.md` и `plan.md` описывают одну работу на разных уровнях детализации и в разных местах.
+3. Пользователь вручную решает, какой skill запускать на каждом шаге.
+
+`superpowers-bridge` делает это одним lifecycle и направляет outputs в `openspec/changes/<name>/`.
+
+## Entry и exit gates
+
+Не каждое изменение требует OpenSpec change.
+
+| Ситуация | Нужен opsx change? | Действие |
 |---|---|---|
-| `openspec/schemas/superpowers-bridge/` | Auto-overwritten — entire directory replaced from the schema bundle (`rm -rf` + `cp -R` in the project-local manual method; equivalent in the Claude Code prompt) | None |
-| `CLAUDE.md` (project root) | The schema dir ships `templates/adopters/CLAUDE.md.fragment.<locale>.md`; the upgrade procedure diffs your existing CLAUDE.md against this fragment and waits for your ack before inserting / replacing | Yes — review diff, choose insert / replace / keep |
+| Новая feature / capability | Да | `/opsx:new <name> --schema superpowers-bridge` |
+| Breaking change | Да | То же |
+| Архитектурное изменение | Да | То же |
+| Bug fix без изменения контракта | Нет | Direct PR |
+| Test backfill / coverage | Нет | Direct PR |
+| Linter, build tooling, non-breaking dependency upgrade | Нет | Direct PR |
+| Documentation / typo / config value tweak | Нет | Direct PR |
 
-> The bridge directory is monolithic — you take the whole new version or stay on the old one. There is no per-file opt-in. CLAUDE.md is the only project-root file the upgrade ever touches, and never without your ack.
+Принцип: процесс должен быть пропорционален риску. Внешний контракт, cross-system integration, DB schema, compliance boundary - через change. Локальный фикс, typo или настройка timeout - direct PR.
 
-> In-flight changes remain valid across the v1.1.1 graph tightening. If `brainstorm.md` exists but `proposal.md` does not, `/opsx:continue` now unlocks only `proposal.md`; `design.md` follows after `proposal.md`. Existing `design.md`, `verify.md`, and `retrospective.md` files remain readable.
+Если разговор начался как verbal brainstorm, не пишите результат в `docs/superpowers/specs/`. Продолжайте устно и задавайте по одному прямому вопросу, пока не выполнены все 7 условий:
 
-> Future schema graph changes (artifact add/remove, `requires:` edge changes, PRECHECK changes) are listed under "Known schema graph changes" below. Prose-only v1.x instruction updates remain safe and do not need migration.
+1. Scope закрыт: одной фразой понятно, что входит и что не входит.
+2. Главные design forks разрешены: альтернативы рассмотрены, выбран один путь.
+3. Cross-system dependencies размечены как ready / mockable / non-blocking unknown с owner и причиной, почему это не блокирует downstream artifacts.
+4. Acceptance criteria можно перечислить конкретно.
+5. Capability list можно назвать без guessing.
+6. Blocking TBD отсутствуют: нет неизвестных, которые могут изменить proposal, design, specs, tasks, plan или apply.
+7. Последние реплики явно подтверждают направление, а не открывают новые forks.
 
----
+Когда все условия выполнены, модель может предложить `/opsx:propose`, но promotion всегда требует явного подтверждения пользователя.
 
-## What problem does this solve?
+Front-door anti-patterns:
 
-OpenSpec governs **what to do** (artifact lifecycle: proposal / specs / tasks / verify, etc.). Superpowers governs **how to do it** (execution discipline: brainstorming, writing-plans, TDD, code review). Each is solid on its own; interleaving them in real development surfaces three structural problems:
+- Brainstorming пишет в `docs/superpowers/specs/` после установки schema.
+- Writing-plans пишет в `docs/superpowers/plans/`.
+- Opsx change открывается при blocking TBD.
+- Change открывается для bug fix / typo / config tweak.
 
-1. **Output duplication** — brainstorming writes design output to `docs/superpowers/specs/`; OpenSpec re-authors `proposal.md` / `design.md` in the change directory, with overlapping content.
-2. **Task fragmentation** — OpenSpec's `tasks.md` (coarse checkboxes) and Superpowers' `plan.md` (TDD micro-steps) describe the same work in different formats, locations, and progress trackers.
-3. **Manual orchestration** — the user has to decide on every step which skill to invoke; the two systems do not connect on their own.
+## Workflow и порядок artifact
 
-### Why a custom schema rather than modifying existing skills?
-
-Two alternatives were considered and rejected:
-
-- **Adding custom fields to `config.yaml`** (e.g., `skill_bindings`): the OpenSpec CLI does not recognize them — no validation, no discoverability, requires editing multiple SKILL.md files.
-- **Editing the opsx skill files directly**: invasive (affects every change) and fragile (overwritten on SKILL.md upgrade).
-
-A custom schema uses OpenSpec's **native project-level schema mechanism**: the CLI validates structure, `openspec schemas` lists it automatically, each change picks its schema independently (`--schema spec-driven` or `--schema superpowers-bridge`), and no existing SKILL.md or command file is modified.
-
----
-
-## Entry & exit gates
-
-This schema's instructions only fire when invoked through `/opsx:*` commands. If you trigger Superpowers skills via narrative — for example, by saying "let's discuss the architecture" — the default behavior bypasses the schema. Brainstorming will still write to `docs/superpowers/specs/`, defeating the integration's redirection.
-
-This section covers three things:
-
-1. When you don't need to enter the schema at all (just open a PR)
-2. When verbal brainstorming should be promoted to an opsx change
-3. Front-door anti-patterns to avoid once the schema is installed
-
-### When NOT to enter the schema (direct PR)
-
-Not every change needs a `change` directory. The following scenarios should skip opsx entirely:
-
-| Scenario | Need a change? | What to do |
-|---|---|---|
-| New feature / new capability | ✅ Yes | `/opsx:new <name> --schema superpowers-bridge` |
-| Breaking change | ✅ Yes | Same |
-| Architecture change | ✅ Yes | Same |
-| Bug fix (restoring intended behavior, no contract change) | ❌ No | Direct PR |
-| Test backfill / coverage | ❌ No | Direct PR |
-| Build tooling tweak (linter rule, coverage threshold) | ❌ No | Direct PR |
-| Non-breaking dependency upgrade | ❌ No | Direct PR |
-| Documentation update / typo fix | ❌ No | Direct PR |
-| Config value tweak (no structural change) | ❌ No | Direct PR |
-
-> Principle: **process ceremony should scale with risk**. External contracts, cross-system integration, DB schema changes, compliance boundaries → run a change. Typos, bug fixes, timeout adjustments → direct PR. For ambiguous cases, use the 5-condition checklist below.
-
-### When verbal brainstorming should be promoted to a change
-
-If `superpowers:brainstorming` was triggered via narrative ("let's brainstorm the architecture") in a project that uses this schema, the brainstorming output **MUST NOT** land in `docs/superpowers/specs/` — that bypasses the schema's output redirection and creates orphan artifacts.
-
-The correct flow: keep brainstorming verbally until all 5 conditions below hold, then promote to `/opsx:propose` or `/opsx:new` so the agreed design lands in `openspec/changes/<name>/brainstorm.md`.
-
-1. **Scope locked** — one sentence describes what's in / out, and the scope doesn't keep growing each turn
-2. **Major design forks resolved** — alternatives have been weighed and one chosen; remaining unknowns are **explicit TBDs** (with owner and impact-scope statement), not "haven't thought about it yet"
-3. **Cross-system dependencies mapped** — for each dependency: ready / mockable / genuinely unknown — pick one
-4. **Acceptance criteria stateable** — concrete pass conditions (e.g., `./mvnw clean verify` passes + N specific deliverables)
-5. **Conversation converging** — the last 1-2 turns are confirmations, not new "what about..." forks
-
-If any condition is missing, keep brainstorming. When all five hold:
-- The model **should proactively suggest** "this looks ready for `/opsx:propose` — want to open a change?"
-- The user **may also explicitly say** "open this as an opsx change"
-- Either way, **promotion requires a deliberate human ack** — never automatic
-
-### Front-door anti-patterns
-
-| Anti-pattern | Why it's wrong |
-|---|---|
-| Letting brainstorming write to `docs/superpowers/specs/` after the schema is installed | Bypasses the brainstorm redirection instruction in [schema.yaml](./schema.yaml); produces orphan artifacts |
-| Letting writing-plans write to `docs/superpowers/plans/` | Bypasses the plan redirection instruction in [schema.yaml](./schema.yaml); produces orphan artifacts |
-| Promoting to opsx with unresolved blocking TBDs | Those TBDs will block apply phase too — promotion just defers the same problem |
-| Opening a change for bug fix / typo / config tweak | Process ceremony exceeds actual risk; slows delivery without value |
-
----
-
-## Workflow & integration
-
-### Artifact DAG
+Artifact DAG:
 
 ```text
-brainstorm ──→ proposal ──→ design ──→ specs ──→ tasks ──→ plan ──→ [apply] ──→ verify ──→ retrospective
+brainstorm -> proposal -> design -> specs -> tasks -> plan -> [apply] -> verify -> retrospective
 ```
 
-Differences from `spec-driven`:
+Planning порядок enforced в `schema.yaml`:
 
-| | spec-driven | superpowers-bridge |
-|---|---|---|
-| Entry | proposal (manual) | **brainstorm** (invokes brainstorming skill) |
-| Plan layer | tasks (coarse) | tasks + **plan** (TDD micro-steps) |
-| apply requires | tasks | **plan** |
-| apply method | standard task-by-task | **worktree + subagent-driven-development** (with TDD + code-review transitive) |
-| Post-apply | (none) | **verify** + **retrospective** artifacts |
-| New artifacts | — | brainstorm, plan, verify, retrospective |
+- `proposal.requires: [brainstorm]`
+- `design.requires: [proposal]`
+- `specs.requires: [proposal, design]`
+- `tasks.requires: [specs, design]`
+- `plan.requires: [tasks]`
 
-### Lifecycle (apply orchestration + timing notes)
+Из-за этого после `brainstorm.md` ready только `proposal.md`; `design.md` не может быть создан раньше `proposal.md`. Даже если `/opsx:continue` получает несколько ready artifacts от `openspec status --json`, безопасный tie-breaker выбирает по порядку `artifacts:` в активной schema, а не по случайному порядку JSON.
 
-The Artifact DAG above shows **file-existence** dependencies. Planning artifacts are intentionally serial: `proposal.md` scopes the change before `design.md`, and both files must exist before `specs/**/*.md`. The runtime lifecycle below adds the apply phase's ordered steps and the **timing offsets** for post-apply artifacts.
+### Lifecycle
 
 ```mermaid
 flowchart TD
-    Start([/opsx:propose · /opsx:new])
+    Start(["/opsx:propose or /opsx:new"])
 
-    subgraph Plan ["📝 PLANNING — 7 artifacts"]
-        direction TB
-        BS["<b>brainstorm.md</b><br/><i>superpowers:brainstorming</i>"]
-        PROP["<b>proposal.md</b>"]
-        DES["<b>design.md</b><br/><i>(required, structured decisions)</i>"]
-        SP["<b>specs/**/*.md</b>"]
-        TK["<b>tasks.md</b>"]
-        PL["<b>plan.md</b><br/><i>superpowers:writing-plans</i>"]
+    subgraph Plan ["PLANNING - artifacts"]
+        BS["brainstorm.md<br/>superpowers:brainstorming"]
+        PROP["proposal.md"]
+        DES["design.md<br/>structured decisions"]
+        SP["specs/**/*.md"]
+        TK["tasks.md"]
+        PL["plan.md<br/>superpowers:writing-plans"]
 
         BS --> PROP
         PROP --> DES
-        PROP -. capabilities .-> SP
+        PROP --> SP
         DES --> SP
         SP --> TK
         DES --> TK
         TK --> PL
-        DES -. ref .-> PL
     end
 
-    subgraph Apply ["⚙️ APPLY — 7 ordered steps (requires: plan, tracks: tasks.md)"]
-        direction TB
-        A0["<b>0. Pre-flight skill check</b>"]
-        A1["<b>1. Workspace</b><br/><i>using-git-worktrees</i>"]
-        A2["<b>2. Executor</b><br/><i>subagent-driven-development</i><br/>↳ TDD + code-review (transitive)"]
-        A3["<b>3. Verification</b><br/><i>openspec-verify-change</i> → verify.md"]
-        A4["<b>4. Retrospective</b> → retrospective.md<br/>(BEFORE PR; hot context)"]
-        A5["<b>5. Archive</b><br/><i>openspec archive -y</i><br/>(sync delta + move folder)"]
-        A6["<b>6. Completion</b><br/><i>finishing-a-development-branch</i><br/>🏁 PR is LAST"]
+    subgraph Apply ["APPLY - ordered steps"]
+        A0["0. Pre-flight skill check"]
+        A1["1. Workspace<br/>using-git-worktrees"]
+        A2["2. Executor<br/>subagent-driven-development"]
+        A3["3. Verification<br/>openspec-verify-change -> verify.md"]
+        A4["4. Retrospective<br/>retrospective.md before PR"]
+        A5["5. Archive<br/>openspec archive -y"]
+        A6["6. Completion<br/>finishing-a-development-branch"]
 
         A0 --> A1 --> A2 --> A3
-        A3 -. blocking → fix .-> A2
+        A3 -. blocking fix .-> A2
         A3 --> A4 --> A5 --> A6
     end
 
     Start --> BS
-    PL ==>|apply.requires: plan| A0
-
-    classDef artifact fill:#e1f5ff,stroke:#0277bd,color:#000
-    classDef step fill:#f3e5f5,stroke:#6a1b9a,color:#000
-    classDef capstone fill:#e8f5e9,stroke:#2e7d32,color:#000
-
-    class BS,PROP,DES,SP,TK,PL artifact
-    class A0,A1,A2,A3,A4,A5 step
-    class A6 capstone
+    PL --> A0
 ```
 
-ASCII fallback (CLI-readable):
+Timing notes:
 
-```text
-PLANNING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  brainstorm.md ──→ proposal.md ──→ design.md (required) ──→ specs/**/*.md ──→ tasks.md ──→ plan.md
-                                                                       │
-                          apply.requires: [plan], apply.tracks: tasks  ▼
-APPLY ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  0. Pre-flight skill check
-  1. superpowers:using-git-worktrees
-  2. superpowers:subagent-driven-development (+ TDD + code-review transitive)
-  3. openspec-verify-change → verify.md ◄┐
-                              │           │ blocking → fix
-                              ▼           │
-  4. retrospective.md (BEFORE PR; hot context)
-  5. openspec archive -y (sync delta + move folder)
-  6. superpowers:finishing-a-development-branch (🏁 PR is LAST)
-```
+- Planning order больше не зависит от порядка ready artifacts в `/opsx:continue`.
+- `verify.md` имеет `requires: [plan]` только как file-existence edge, но фактически создается после apply.
+- `retrospective.md` имеет `requires: [verify]` и пишется после successful verify, до PR.
+- Полное engine-level исправление для post-apply artifacts требует upstream `post_apply` phase.
 
-> **Timing notes** (full rationale in "Six design touches" #6):
-> - Planning order is enforced by `requires:` edges: `design.requires: [proposal]`, and `specs.requires: [proposal, design]`.
-> - `verify.md` declares `requires: plan` in the graph but is actually produced inside apply step 3.
-> - `retrospective.md` declares `requires: verify` and per Step 4 is produced **before** the PR opens — so the PR diff includes the complete archived cycle (all artifacts done, spec synced, change folder under `archive/`).
-> - The remaining timing mismatch is post-apply only; planning order no longer depends on `/opsx:continue` choosing among parallel ready artifacts.
+## Superpowers touchpoints
 
-### Seven Superpowers touchpoints
+| # | Skill | Где вызывается |
+|---|---|---|
+| 1 | `superpowers:brainstorming` | `brainstorm` artifact |
+| 2 | `superpowers:writing-plans` | `plan` artifact |
+| 3 | `superpowers:using-git-worktrees` | apply step 1 |
+| 4 | `superpowers:subagent-driven-development` | apply step 2 |
+| 5 | `superpowers:test-driven-development` | transitive внутри step 2 |
+| 6 | `superpowers:requesting-code-review` | transitive внутри step 2 |
+| 7 | `superpowers:finishing-a-development-branch` | apply step 6 |
 
-| # | Superpowers skill | Where it's invoked | Trigger |
-|---|---|---|---|
-| 1 | `superpowers:brainstorming` | `brainstorm` artifact instruction | Direct (with PRECHECK) |
-| 2 | `superpowers:writing-plans` | `plan` artifact instruction | Direct (with PRECHECK) |
-| 3 | `superpowers:using-git-worktrees` | apply step 1 | Direct |
-| 4 | `superpowers:subagent-driven-development` | apply step 2 | Direct |
-| 5 | `superpowers:test-driven-development` | (activated inside #4) | **Transitive** |
-| 6 | `superpowers:requesting-code-review` | (activated inside #4) | **Transitive** |
-| 7 | `superpowers:finishing-a-development-branch` | apply step 4 | Direct |
+`executing-plans` не используется как fallback: он не активирует TDD и code review транзитивно, поэтому такой fallback незаметно ослабил бы workflow. Если runtime не поддерживает subagents, используйте built-in `spec-driven`.
 
-Plus one OpenSpec built-in: `openspec-verify-change` (apply step 3, produces `verify.md`).
+## Brainstorm hardening
 
-> **No `executing-plans` fallback.** This schema is opinionated: it requires a subagent-capable platform (Claude Code, Codex, etc.). The alternative executor `superpowers:executing-plans` does not transitively activate TDD or code-review (verified against its [SKILL.md](https://github.com/obra/superpowers/blob/main/skills/executing-plans/SKILL.md)) — falling back would silently degrade Superpowers' core value. If your platform lacks subagent support, use the built-in `spec-driven` schema instead.
+`brainstorm` вызывает `superpowers:brainstorming`, но добавляет OpenSpec-safe слой:
 
-### Output redirection
+- mandatory clarification gate: brainstorm задает по одному прямому вопросу, пока scope, domain model, design forks, capabilities, acceptance criteria и user-approved direction не закрыты явно;
+- grilling decision tree: по одному unresolved design fork за раз, с recommended answer и trade-off;
+- domain-modeling pass: terms, identities, ownership boundaries, lifecycle states, invariants, edge cases и glossary conflicts;
+- evidence before assumptions: проверять project files и official docs до принятия проверяемых фактов;
+- blocking TBD discipline: blocking unknowns запрещают завершать brainstorm; non-blocking TBD допустимы только с owner, impact scope, причиной почему они не блокируют downstream artifacts, и blocking phase `none`.
 
-Superpowers skills have default output paths (e.g., brainstorming writes to `docs/superpowers/specs/`). This schema's artifact instructions **override** that behavior by injecting context that redirects output into the change directory:
+`brainstorm.md` создается только после закрытого Clarification Gate и явного подтверждения validated direction пользователем. Файл остается raw capture: после raw части добавляется `## OpenSpec Capture Summary` с Clarification Gate, Evidence Checked, Domain Model, Grilling Decision Tree, Resolved Decisions, Rejected Alternatives, Risks / Trade-offs, Non-Blocking TBDs, Documentation Candidates и Validated Direction. `proposal.md` извлекает scope и capabilities из summary. `design.md` читает `brainstorm.md` как главный источник решений и использует `proposal.md` только как scope/capability context.
 
-- brainstorming → `openspec/changes/<name>/brainstorm.md`
-- writing-plans → `openspec/changes/<name>/plan.md`
+## Использование
 
-Implemented purely via context injection at invocation time, not by modifying skill source.
+### Быстрый flow
 
-### Brainstorm hardening
-
-The `brainstorm` artifact still invokes `superpowers:brainstorming` directly, but the schema adds an OpenSpec-safe hardening layer inspired by grilling and domain-modeling workflows:
-
-- Ask one unresolved design-fork question at a time, with a recommended answer and trade-off.
-- Identify domain terms, identities, ownership boundaries, lifecycle states, invariants, edge cases, and glossary conflicts.
-- Inspect project evidence and official documentation before accepting assumptions that can be checked.
-- Mark remaining unknowns as explicit TBDs with owner, impact scope, and blocking phase.
-
-`brainstorm.md` remains a raw capture first. After the raw transcript, the artifact appends `## OpenSpec Capture Summary` with Evidence Checked, Domain Model, Grilling Decision Tree, Resolved Decisions, Rejected Alternatives, Risks / Trade-offs, Documentation Candidates, and Validated Direction. `proposal.md` prefers that summary for scope and capabilities. `design.md` still uses `brainstorm.md` as the primary decision source, and reads `proposal.md` only for scope / capability context.
-
----
-
-## Usage
-
-### Quick flow (recommended)
 ```bash
-/opsx:ff my-feature    # one-shot: scaffold + brainstorm + proposal + design + specs + tasks + plan
-/opsx:apply            # worktree + subagent-driven-development (with TDD + code-review)
-/opsx:verify           # produces verify.md (7 checks)
-/opsx:continue         # → retrospective (produces retrospective.md, §0 + 6 sections)
-/opsx:archive          # archive
-```
-
-### Step-by-step flow
-```bash
-/opsx:new my-feature --schema superpowers-bridge
-/opsx:continue         # → brainstorm (interactive dialogue)
-/opsx:continue         # → proposal
-/opsx:continue         # → design (reorganize brainstorm into structured decisions)
-/opsx:continue         # → specs
-/opsx:continue         # → tasks
-/opsx:continue         # → plan
-/opsx:apply            # → implementation + worktree + subagent-driven-development
-/opsx:verify           # → verify.md (post-apply, runs the 7 checks)
-/opsx:continue         # → retrospective.md (post-verify, evidence-first §0 + 6 sections)
+/opsx:ff my-feature
+/opsx:apply
+/opsx:verify
+/opsx:continue
 /opsx:archive
 ```
 
-### Switching back to spec-driven
-```bash
-# Use a different schema for one change
-/opsx:new my-simple-fix --schema spec-driven
+### Step-by-step flow
 
-# Or change project default in openspec/config.yaml: schema: spec-driven
+```bash
+/opsx:new my-feature --schema superpowers-bridge
+/opsx:continue         # brainstorm
+/opsx:continue         # proposal
+/opsx:continue         # design
+/opsx:continue         # specs
+/opsx:continue         # tasks
+/opsx:continue         # plan
+/opsx:apply            # implementation
+/opsx:verify           # verify.md
+/opsx:continue         # retrospective.md
+/opsx:archive
 ```
 
----
+### Вернуться к spec-driven
 
-## Apply phase walkthrough
+```bash
+/opsx:new my-simple-fix --schema spec-driven
+```
 
-`/opsx:apply` triggers the steps inside [schema.yaml](./schema.yaml)'s `apply.instruction`:
+или выставить default schema в `openspec/config.yaml`.
 
-#### 0. Pre-flight — verify required Superpowers skills
+## Apply phase
 
-Confirms these skills are installed before proceeding:
+`/opsx:apply` следует `apply.instruction` в [schema.yaml](./schema.yaml):
 
-- `superpowers:using-git-worktrees`
-- `superpowers:subagent-driven-development` (transitive: `test-driven-development`, `requesting-code-review`)
-- `superpowers:finishing-a-development-branch`
-
-Missing skill → STOP with explicit error. No silent fallback, no manual mode within this schema. The user should either install Superpowers or switch to the built-in `spec-driven` schema for that change.
-
-> The v0 version of this schema once placed an "auto-commit change artifacts to current branch" step here. It was removed after the [PR #970 review](https://github.com/Fission-AI/OpenSpec/pull/970): handling untracked change directories is the worktree skill's responsibility, not the schema's.
-
-#### 1. Workspace — `superpowers:using-git-worktrees`
-
-Creates `.worktrees/<change-name>/`, switches to a new branch, runs setup, confirms a clean test baseline.
-
-#### 2. Executor — `superpowers:subagent-driven-development`
-
-Main agent reads `plan.md`, dispatches a fresh subagent per micro-task. Each subagent transitively activates:
-
-- **TDD** (`superpowers:test-driven-development`): write failing test → watch it fail → minimal code → pass; production code without prior test gets deleted
-- **Per-task code review** (`superpowers:requesting-code-review`): spec-compliance review + code-quality review; critical issues block forward motion
-
-Coarse `tasks.md` checkboxes tick as tasks complete. After all tasks, a final code review covers the whole implementation.
-
-This schema does NOT support `superpowers:executing-plans` as a fallback. See the "Six design touches" section below for rationale.
-
-#### 3. Verification — `openspec-verify-change`
-
-Produces `verify.md` from 7 checks: structural validation (`openspec validate --all --json`), task completion, delta-spec sync state, design/specs coherence (non-blocking warning), implementation signal (committed code), front-door routing leak detector (non-blocking warning), and deferred-dogfood vs automated-test equivalence. The last check blocks only when `plan.md` has `[~]` deferrals but the equivalence section is empty (gap analysis skipped); otherwise it is informational.
-
-Failures route back to the corresponding artifact for fix; verify can be re-run.
-
-> **Steps 4–6 are the canonical post-verify sequence: retro → archive → PR. Reordering produces incomplete PRs (retrospective + archive land as trailing post-merge commits, losing hot context).**
-
-#### 4. Retrospective — `retrospective` artifact (recommended; per Entry & exit gates skip rules, trivial fixes may skip)
-
-Evidence-first reflection: §0 Evidence (quantitative front-matter — commit count, diff size, tasks-done ratio, dependencies, validate state, etc.) plus 6 analysis sections (Wins / Misses / Plan deviations / Skill compliance / Surprises / Promote candidates). Each claim cites a commit / file / measurable fact, typically referencing §0 instead of inlining evidence per bullet. The procedure is embedded in the artifact's instruction — no external skill required (Decision 3 in the design spec defers Claude Code plugin packaging to v1.x).
-
-Written **before** opening the PR so retro lands in the same PR diff.
-
-#### 5. Archive — `openspec archive -y` (or `/opsx:archive`)
-
-Syncs delta specs into `openspec/specs/<capability>/spec.md` and moves the change folder to `openspec/changes/archive/YYYY-MM-DD-<name>/`. Run **before** the PR opens so the diff reflects the complete archived cycle (all artifacts done, spec synced, folder under archive/).
-
-#### 6. Completion — `superpowers:finishing-a-development-branch`
-
-Confirms tests are green, presents merge / PR / keep-branch / discard options, cleans up the worktree. **PR is the last step** — if retro or archive haven't been done, finish them first.
-
----
+1. **Pre-flight** - проверить наличие required Superpowers skills и project CLI tools.
+2. **Workspace** - вызвать `superpowers:using-git-worktrees`.
+3. **Executor** - вызвать `superpowers:subagent-driven-development`; subagents работают по `plan.md`, обновляют `tasks.md`, используют TDD и code review.
+4. **Verification** - создать `verify.md` через `openspec-verify-change`, исправить blocking issues и перезапустить verify при необходимости.
+5. **Retrospective** - написать `retrospective.md`, пока контекст свежий, до PR.
+6. **Archive** - выполнить `openspec archive -y`, синхронизировать delta specs и переместить change в archive.
+7. **Completion** - вызвать `superpowers:finishing-a-development-branch`; PR открывается только после retro + archive.
 
 ## CLI cheat sheet
 
-| Scenario | Command |
+| Сценарий | Команда |
 |---|---|
-| First clone of a project | `bash scripts/install-git-hooks.sh` |
-| New change (interactive) | `/opsx:new <name> --schema superpowers-bridge` then `/opsx:continue` |
-| New change (one-shot) | `/opsx:ff <name>` |
-| Resume an interrupted change | `/opsx:continue <name>` |
-| Enter implementation | `/opsx:apply <name>` |
-| Manual verify | `/opsx:verify <name>` |
+| Новый интерактивный change | `/opsx:new <name> --schema superpowers-bridge`, затем `/opsx:continue` |
+| Новый one-shot change | `/opsx:ff <name>` |
+| Продолжить change | `/opsx:continue <name>` |
+| Реализация | `/opsx:apply <name>` |
+| Verify | `/opsx:verify <name>` |
 | Archive | `/opsx:archive <name>` |
-| Use built-in (skip brainstorm) | `/opsx:new <name> --schema spec-driven` |
-| List all schemas in the project | `openspec schemas` |
-| Inspect a change's progress | `openspec status --change <name> --json` |
-| List active changes | `openspec list` |
-| Validate the entire project | `openspec validate --all --json` |
+| Built-in schema | `/opsx:new <name> --schema spec-driven` |
+| Список schemas | `openspec schemas` |
+| Статус change | `openspec status --change <name> --json` |
+| Активные changes | `openspec list` |
+| Полная валидация | `openspec validate --all --json` |
 
----
+## Design touches
 
-## Six design touches worth remembering
+### 1. Skill PRECHECK
 
-### 1. Skill-name PRECHECK (Layer 1 capability detection)
+Каждый artifact / apply step, который вызывает Superpowers skill, сначала проверяет, что skill доступен в списке skills LLM. Missing skill = STOP без silent fallback.
 
-Each artifact / apply step that invokes a Superpowers skill runs a PRECHECK at the start of its instruction, confirming the skill exists in the LLM's available skills list. **Missing skill = STOP, no silent fallback.** This is the concrete answer to layer 1 of [PR #970 review](https://github.com/Fission-AI/OpenSpec/pull/970)'s concern #1 — fail loud, fail early.
+### 2. Prompt-level integration
 
-### 2. Schema-level vs prompt-level integration
+Bridge реализован через `instruction:` в schema. Он не патчит Superpowers и OpenSpec CLI. Если skill переименуют или удалят, меняется schema; если меняется внутренняя логика skill, bundle не должен vendor-ить ее копию.
 
-Integration lives entirely in `instruction:` fields (pure prompts). If Superpowers upgrades a skill's behavior, the schema doesn't change. We only touch `schema.yaml` if a skill is renamed or removed.
+### 3. Explicit transitive dependencies
 
-The brainstorm hardening is also prompt-level integration: no third-party skill is vendored or modified. The schema keeps `superpowers:brainstorming` as the only required brainstorm skill, then asks the model to append an OpenSpec Capture Summary that downstream artifacts can consume deterministically.
+`subagent-driven-development` внутри активирует TDD и code review. Schema прямо документирует это, чтобы apply phase был читаемым без открытия SKILL.md.
 
-### 3. Transitive dependencies made explicit
+### 4. Subagent platforms only
 
-TDD and code-review are normally hidden inside `subagent-driven-development`'s SKILL.md. Our schema's apply step 2a instruction lists these two transitive activations explicitly, so a reader can see "what actually happens during apply" at a glance.
+Schema рассчитана на Claude Code, Codex и другие runtime с subagents. Для runtime без subagents используйте `spec-driven`.
 
-### 4. Opinionated: subagent platforms only, no manual fallback
+### 5. Evidence-based PRECHECK
 
-This schema requires a subagent-capable platform (Claude Code, Codex, etc.). The alternative executor `superpowers:executing-plans` does NOT transitively activate TDD or code-review (verified against its [SKILL.md](https://github.com/obra/superpowers/blob/main/skills/executing-plans/SKILL.md) — its body has no mention of either, and its Integration section omits both `test-driven-development` and `requesting-code-review`). Falling back to it would silently lose what Superpowers brings to this integration. We prefer to fail loud at Step 0 and direct users to the built-in `spec-driven` schema instead.
+`verify` и `retrospective` проверяют observable state командами вроде `git log`, `grep` и чтением `verify.md`. Это mitigation для того, что OpenSpec graph пока не умеет post-apply state machine.
 
-### 5. Evidence-based PRECHECK for verify and retrospective (Layer 2 capability detection)
+### 6. Post-apply timing mismatch
 
-Each timing-sensitive artifact runs concrete shell evidence checks at the start of its instruction:
+`verify.requires: [plan]` и `retrospective.requires: [verify]` являются file-existence dependencies. Реально оба artifact создаются после apply. Это известное ограничение v1, пока в OpenSpec нет `post_apply`.
 
-- **verify**: `git log <base>..HEAD | wc -l > 0` AND `grep -c '^- \[x\]' tasks.md > 0`
-- **retrospective**: `test -f verify.md` AND `! grep -q '^- \[x\] ❌ FAIL' verify.md`
+## Версионирование
 
-The LLM does not need to interpret timing prose — it runs commands and reads results. This is layer 2 of concern #1 / mitigation for concern #2.
+| Identifier | Где | Значение |
+|---|---|---|
+| Schema major | `schema.yaml: version: 1` | Contract graph: artifacts, `requires:` edges, PRECHECK shape |
+| Bundle release | `VERSION` + git tag | SemVer release bundle внутри schema major |
 
-### 6. verify and retrospective are time-mismatched artifacts (known limitation)
+`1.x.y` - release для schema major `v1`. Будущий `v2` начнет bundle releases с `2.0.0`.
 
-`verify.requires: [plan]` and `retrospective.requires: [verify]` are file-existence dependencies in the schema graph, but each instruction explicitly states "MUST run AFTER apply phase / verify pass". This is intentional misalignment — OpenSpec's engine only checks predecessor file existence. Engine-native fix awaits a `post_apply` phase concept upstream (analogous to spec-kit's `after_implement` hook); evidence-based PRECHECK above is the v1 mitigation.
+## Совместимость
 
----
-
-## Versioning
-
-This bundle carries **two version identifiers** that should not be confused:
-
-| Identifier | Where | Meaning | Example |
-|---|---|---|---|
-| Schema major | `schema.yaml: version: 1` | Contract of the schema graph (artifacts, `requires:` edges, PRECHECK shape). Breaking changes bump this. | `1` |
-| Bundle release | `VERSION` file + git tag | SemVer release of this bundle, scoped to a schema major. | `1.0.0` (tagged `v1.0.0`) |
-
-A bundle release `1.x.y` is a published cut of schema major `v1`. A future schema major `v2` will restart bundle releases at `2.0.0`. Adopters who pin to `v1.x.y` are guaranteed schema-graph compatibility within the v1 major.
-
-> The compatibility matrix below uses `v1` (schema major) as the row key, because compatibility with OpenSpec / Superpowers is governed by the schema contract, not by patch-level edits inside this bundle.
-
-## Compatibility
-
-Baseline versions this schema was authored against. This is a **historical snapshot, not an end-to-end compatibility guarantee** — CI cannot run the full prompt-layer workflow in headless mode, so behavioral compatibility relies on human review when drift fires.
-
-Current bundle release: **`1.1.1`** (see [VERSION](./VERSION)).
+Baseline versions, против которых писалась schema. Это historical snapshot, а не автоматическая гарантия end-to-end совместимости: prompt-layer workflow полностью не прогоняется в headless CI.
 
 | superpowers-bridge | OpenSpec CLI | Superpowers plugin | Baseline as of |
 |---|---|---|---|
 | v1 | `1.4.1` | `v5.1.0` | 2026-06-10 |
 
-### How this is checked
+Проверка состоит из трех уровней:
 
-The contract is three layers — **baseline declaration + automated drift detection + human review** — not automated compatibility enforcement.
+| Уровень | Механизм |
+|---|---|
+| Structural | `validate-schemas.yml` на push/PR и weekly `version-check.yml` против latest OpenSpec |
+| Drift notification | `version-check.yml` открывает или обновляет issue с label `upstream-version-check`, когда baseline отстает |
+| End-to-end workflow | Ручная проверка maintainer-ом после upstream drift |
 
-| Layer | Mechanism | Catches | When it fires |
-|---|---|---|---|
-| Structural | [`validate-schemas.yml`](../.github/workflows/validate-schemas.yml) on every push/PR; [`version-check.yml`](../.github/workflows/version-check.yml) weekly against latest OpenSpec | Schema-graph breaks (field renames, removed `requires:` edges, PRECHECK syntax changes) | CI run fails red |
-| Drift notification | [`version-check.yml`](../.github/workflows/version-check.yml) weekly, compares baseline above against latest npm / GitHub release | Pinned ≠ latest upstream | Opens / updates a [labelled drift issue](https://github.com/AlekseiSeleznev/openspec-schemas/issues?q=is%3Aopen+label%3Aupstream-version-check) for human review (workflow stays green — drift is normal, not a failure) |
-| End-to-end workflow | **Not automated** | Behavioral changes inside Superpowers skills (renames, prose rewrites altering PRECHECK semantics, transitive-dependency changes); subtle OpenSpec engine semantic shifts | A human reads upstream release notes when the drift issue fires |
+## Известные schema behavior changes
 
-The "Baseline as of" date is bumped when a maintainer manually re-runs a full cycle against the listed versions and confirms nothing degraded. Until then, the date marks human attestation, not an automated test pass.
+- **v1.1.2** - `brainstorm` tightened to require an explicit Clarification Gate before `brainstorm.md` can be written. Blocking TBDs now prevent brainstorm completion; non-blocking TBDs must be classified with owner, impact scope, non-blocking reason and blocking phase `none`. Manual fallback for `brainstorm` removed so the Superpowers question loop remains mandatory.
+- **v1.1.1** - planning order tightened to match documented lifecycle: `design.requires` изменен с `[brainstorm]` на `[proposal]`, `specs.requires` изменен с `[proposal]` на `[proposal, design]`. Migration не требует rewrite файлов; in-flight changes продолжают создание недостающего predecessor.
 
-### Known schema graph changes
+## Почему так
 
-- **v1.1.1** — tightened planning order to match the documented lifecycle: `design.requires` changed from `[brainstorm]` to `[proposal]`, and `specs.requires` changed from `[proposal]` to `[proposal, design]`. Migration: no file rewrite is required. In-flight changes continue by creating any missing predecessor first.
+### Почему `brainstorm` - artifact, а не hook
 
-For adopters: pin to versions ≥ those listed above. To inspect your own project's runtime state, run `openspec list` + `openspec schemas` + `claude plugin list`.
+Brainstorming интерактивный и multi-turn. Artifact дает trackability через `openspec status` и explicit dependency для downstream artifacts.
 
----
+### Почему `plan` отдельно от `tasks`
 
-## Design decisions worth knowing
-
-### Why `brainstorm` is an artifact, not a hook
-
-Brainstorming is multi-turn interactive dialogue requiring user participation. Modeling it as the first artifact (rather than a schema-level hook) gives two advantages:
-
-1. **Skippable** — if the user already knows what to build, they can author `brainstorm.md` directly without invoking the skill.
-2. **Trackable** — `openspec status` reports brainstorm completion, and downstream artifacts have explicit dependencies on it.
-
-### Why `plan` is separate from `tasks`
-
-`tasks.md` is a coarse checkbox ("Add PdfServiceTest"); `plan.md` is micro-steps ("scaffold test → write downloadPdf test → run → commit"). They serve different purposes:
-
-- `tasks.md` → tracks overall progress (apply phase's `tracks` field parses these checkboxes)
-- `plan.md` → guides subagents step by step (the executor's input)
-
-Apply requires `plan` (not `tasks`) because the executor needs micro-steps; `tracks: tasks.md` ensures progress is still surfaced via the coarse checkboxes.
+`tasks.md` - coarse checklist для progress tracking. `plan.md` - micro-steps для executor/subagents. Apply требует `plan`, а `tracks: tasks.md` показывает coarse progress.
 
 ### Fallback strategy
 
-If a Superpowers skill is unavailable:
-
-- **`brainstorm` / `plan` artifacts** — the user may explicitly opt in to writing the artifact manually (PRECHECK STOPs and informs the user; manual override requires deliberate user action, not silent degradation)
-- **`apply` phase** — no manual fallback within this schema. PRECHECK STOPs at Step 0 if any required skill is missing. The recommended path is to switch to the built-in `spec-driven` schema for that change. Rationale: see Design touch #4 above — `executing-plans` does not transitively activate TDD or code-review, and a degraded apply phase would defeat the schema's purpose.
-
----
+- `brainstorm`: manual fallback внутри этой schema нет. Если `superpowers:brainstorming` отсутствует, нужно установить Superpowers или использовать другой workflow; иначе нельзя честно гарантировать question loop и закрытый Clarification Gate.
+- `plan`: PRECHECK останавливается, после чего пользователь может явно решить написать artifact вручную.
+- `apply`: manual fallback внутри этой schema нет. Если required skill отсутствует, нужно установить Superpowers или использовать `spec-driven`.
 
 ## Related
 
-- [schema.yaml](./schema.yaml) — machine-readable schema definition
-- [templates/](./templates/) — markdown templates per artifact
-- [README.zh-TW.md](./README.zh-TW.md) — 繁體中文版
-- [obra/superpowers](https://github.com/obra/superpowers) — Superpowers skill source
-- [Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec) — OpenSpec
-- [OpenSpec PR #970](https://github.com/Fission-AI/OpenSpec/pull/970) — original review thread that drove this design
+- [schema.yaml](./schema.yaml) - machine-readable schema definition
+- [templates/](./templates/) - Markdown templates per artifact
+- [obra/superpowers](https://github.com/obra/superpowers) - Superpowers skill source
+- [Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec) - OpenSpec
+- [OpenSpec PR #970](https://github.com/Fission-AI/OpenSpec/pull/970) - исходный review thread

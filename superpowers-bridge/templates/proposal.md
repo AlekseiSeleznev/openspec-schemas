@@ -4,12 +4,15 @@
 Explain the motivation for this change. What problem does this solve? Why now?
 Prefer brainstorm.md §OpenSpec Capture Summary when present; use the raw capture
 only to resolve missing rationale.
+If brainstorm.md does not show a closed Clarification Gate, or if any
+blocking TBD remains, stop and return to brainstorm instead of writing
+proposal.md.
 
-硬限制：50 ≤ 字元數 ≤ 1000（OpenSpec zod schema 會 validate）
-- 太短：會收到 `Why section must be at least 50 characters` error
-- 太長：會收到 `Why section should not exceed 1000 characters` error
+Hard limit: 50 <= character count <= 1000. OpenSpec zod schema validates this.
+- Too short: `Why section must be at least 50 characters`
+- Too long: `Why section should not exceed 1000 characters`
 
-建議結構：現況痛點 → 為什麼現在處理 → 預期收益（各 1-2 句）
+Suggested structure: current pain -> why now -> expected benefit, 1-2 sentences each.
 -->
 
 ## What Changes
@@ -19,7 +22,8 @@ Describe what will change. Be specific about new capabilities, modifications, or
 Base this on Resolved Decisions, Rejected Alternatives, Risks / Trade-offs, and
 Validated Direction from brainstorm.md §OpenSpec Capture Summary.
 
-對於有明確前後對比的行為變更，使用 From/To 格式（markdown 無 inline diff）：
+For behavior changes with a clear before/after shape, use From/To format
+(Markdown has no inline diff):
 
 **<Section or Behavior Name>**
 - From: <current state / requirement>
@@ -27,17 +31,17 @@ Validated Direction from brainstorm.md §OpenSpec Capture Summary.
 - Reason: <why this change is needed>
 - Impact: <breaking / non-breaking, who's affected>
 
-多個變更可重複此 block；純新增或純刪除可用簡單列表描述。
+Repeat this block for multiple changes. Pure additions or removals may use a concise list.
 -->
 
 ## Capabilities
 
 ### New Capabilities
 <!--
-Capabilities being introduced. Replace <name> with kebab-case identifier.
-命名規則見 openspec/specs/README.md：使用複合名詞（至少 2 個 word），
-例如 `user-auth`、`data-export`、`api-rate-limiting`，不用純單詞。
-Each creates specs/<name>/spec.md
+Capabilities being introduced. Replace <name> with a kebab-case identifier.
+Use compound names with at least two words, for example `user-auth`,
+`data-export`, or `api-rate-limiting`; avoid one-word names.
+Each item creates specs/<name>/spec.md.
 -->
 - `<name>`: <brief description of what this capability covers>
 

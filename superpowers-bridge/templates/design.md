@@ -6,11 +6,13 @@ Prefer brainstorm.md §OpenSpec Capture Summary for structure:
 Evidence Checked, Domain Model, Resolved Decisions, Risks, and
 Validated Direction. Use the raw capture above it for rationale and
 nuance. Read proposal.md for scope and capability context only; do
-not reopen decisions settled in brainstorm.md unless proposal.md
-preserves a blocking TBD.
+not reopen decisions settled in brainstorm.md. If brainstorm.md or
+proposal.md contains a blocking TBD, return to the earlier artifact
+instead of writing design.md.
 
-brainstorm.md 記錄了探索過程（替代方案 + 選定方向）；
-本檔承接選定方向，展開完整技術設計。
+brainstorm.md фиксирует exploration: alternatives, chosen direction и
+trade-offs. Этот файл принимает выбранное направление и разворачивает
+его в полный technical design.
 -->
 
 ## Goals / Non-Goals
@@ -24,33 +26,42 @@ brainstorm.md 記錄了探索過程（替代方案 + 選定方向）；
 ## Decisions
 
 <!--
-所有技術決策的唯一來源（single source of truth）。
-brainstorm.md 的 OpenSpec Capture Summary 記錄了「選了哪條路」，
-本段記錄「那條路上的每個岔口怎麼選的」。
+Единый источник технических решений для реализации. OpenSpec Capture
+Summary в brainstorm.md отвечает на вопрос "какой путь выбран"; этот
+раздел отвечает на вопрос "как именно выбирали на каждом развилочном
+пункте выбранного пути".
 
-每個決策建議結構：
-### D1：<決策標題>
-- **選擇**：<採用的做法>
-- **理由**：<為何這樣選>
-- **已考慮 alternative**：<被拒方案 + 拒絕原因>
+Рекомендуемая структура каждого решения:
+
+### D1: <decision title>
+- **Choice**: <adopted approach>
+- **Rationale**: <why this option was chosen>
+- **Alternatives considered**: <rejected option + rejection reason>
 -->
 
 ## Risks / Trade-offs
 
 <!--
 Known risks and trade-offs.
-Format: [Risk] <描述> → Mitigation: <緩解措施>
-[Trade-off] <取捨描述> → 接受理由
+Format: [Risk] <description> -> Mitigation: <mitigation>
+[Trade-off] <trade-off description> -> Acceptance rationale
 -->
 
 ## Migration Plan
 
 <!--
-部署順序、rollback 策略、驗收條件。
-若本 change 不涉及部署變更（純加套件、無 endpoint / DB 變更），
-可寫「N/A — 本 change 不涉及部署變更」。
+Deployment order, rollback strategy, and acceptance criteria.
+If this change does not affect deployment (for example, package-only
+change with no endpoint / DB change), write:
+"N/A - this change does not affect deployment."
 -->
 
 ## Open Questions
 
-<!-- Outstanding decisions or unknowns to resolve -->
+<!--
+Only non-blocking unknowns belong here. Each item must have owner,
+impact scope, why it does not block specs/tasks/plan/apply, and
+blocking phase `none`. If a question can change scope, capabilities,
+architecture, contracts, verification, or apply safety, it is blocking
+and must be resolved before this file exists.
+-->

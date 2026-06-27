@@ -538,7 +538,7 @@ upfront."
 Implements **Decision 3** (workflow-retrospective embedded, not plugin).
 
 **Files:**
-- Modify: `~/side_project/openspec-schemas/superpowers-bridge/schema.yaml` (remove retro from apply.instruction末段; add new `retrospective` artifact)
+- Modify: `~/side_project/openspec-schemas/superpowers-bridge/schema.yaml` (remove retro from the final part of apply.instruction; add new `retrospective` artifact)
 - Create: `~/side_project/openspec-schemas/superpowers-bridge/templates/retrospective.md`
 
 - [ ] **Step 1: Pre-test**
@@ -749,7 +749,7 @@ cd ~/side_project/openspec-schemas
 git add superpowers-bridge/schema.yaml superpowers-bridge/templates/retrospective.md
 git commit -m "feat(superpowers-bridge): promote retro to retrospective artifact
 
-Removes the old apply.instruction末段 'Recommended — Retrospective
+Removes the old final apply.instruction section 'Recommended — Retrospective
 before archive' guidance and replaces it with a proper retrospective
 artifact (requires: [verify]).
 
@@ -959,20 +959,20 @@ Then add a known-limitations subsection to cover both verify and retrospective. 
 
 `old_string`:
 ```
-### 5. Verify 是 schema graph 的 leaf 但實際在 apply 之後
+### 5. Verify is a schema graph leaf but actually runs after apply
 
-`verify` 的 `requires: [plan]` 只是為了讓 schema graph 完整；它的 instruction 明寫「**MUST run on a completed implementation, NOT during planning**」。這是 OpenSpec DAG 與實際時序的刻意錯位，為的是讓 `openspec status` 能顯示 verify 進度。
+`verify.requires: [plan]` exists only to keep the schema graph complete. Its instruction explicitly says "**MUST run on a completed implementation, NOT during planning**". This is an intentional mismatch between the OpenSpec DAG and runtime timing so `openspec status` can show verify progress.
 ```
 
 `new_string`:
 ```
-### 5. Verify 與 retrospective 是時序錯位的 artifacts(已知限制)
+### 5. Verify and retrospective are time-mismatched artifacts (known limitation)
 
-`verify` 的 `requires: [plan]` 與 `retrospective` 的 `requires: [verify]` 在 schema graph 上是「檔案存在」依賴，但兩者的 instruction 都明寫「MUST run AFTER apply phase / verify pass」。這是 OpenSpec 引擎能力不足造成的刻意錯位 —— 引擎只會檢查前置 artifact 檔案存在，不會檢查 apply phase 是否真的跑完、verify 是否真的 pass。
+`verify.requires: [plan]` and `retrospective.requires: [verify]` are file-existence dependencies in the schema graph, while both instructions explicitly say "MUST run AFTER apply phase / verify pass". This intentional mismatch exists because the OpenSpec engine checks predecessor artifact files, not whether apply actually completed or verify actually passed.
 
-**v1 緩解**：每個 artifact 都加了 evidence-based PRECHECK，用 `git log` / `grep` 檢查可觀察的 runtime 狀態（commit 數、checkbox 完成度、verify.md 內容）。LLM 不必懂時序，只要會跑 shell 指令看 0/非 0。
+**v1 mitigation**: each timing-sensitive artifact has an evidence-based PRECHECK using `git log` / `grep` to inspect observable runtime state: commit count, checkbox completion, and `verify.md` content. The LLM does not need to infer timing; it runs shell commands and reads zero/non-zero results.
 
-**完整修法**：等 OpenSpec 引擎引入 `post_apply` phase（spec-kit 已有 `after_implement` hook 作為前例），屆時 verify 與 retrospective 都會從 artifact 遷移到 `post_apply`，引擎原生強制時序。
+**Complete fix**: wait for the OpenSpec engine to introduce a `post_apply` phase. Spec-kit already has `after_implement` as a precedent. Then verify and retrospective can move from artifacts to `post_apply`, and timing can be enforced natively by the engine.
 ```
 
 - [ ] **Step 4: Update README.md**
@@ -989,7 +989,7 @@ grep -c "^name: superpowers-bridge$" ~/side_project/openspec-schemas/superpowers
 grep -c "^name: sdd-plus-superpowers$" ~/side_project/openspec-schemas/superpowers-bridge/schema.yaml
 grep -c "sdd-plus-superpowers" ~/side_project/openspec-schemas/superpowers-bridge/INTEGRATION.md
 grep -c "sdd-plus-superpowers" ~/side_project/openspec-schemas/superpowers-bridge/README.md
-grep -c "Verify 與 retrospective 是時序錯位的 artifacts" ~/side_project/openspec-schemas/superpowers-bridge/INTEGRATION.md
+grep -c "Verify and retrospective are time-mismatched artifacts" ~/side_project/openspec-schemas/superpowers-bridge/INTEGRATION.md
 ```
 Expected: 1, 0, 0, 0, 1.
 
@@ -1195,14 +1195,14 @@ Find the existing first-line heading and immediately add the Install section aft
 ```
 # superpowers-bridge Schema
 
-將 OpenSpec 的 artifact 治理流程與 Superpowers 的執行技能整合為單一工作流。
+Integrates OpenSpec artifact governance with Superpowers execution skills into one workflow.
 ```
 
 `new_string`:
 ````
 # superpowers-bridge Schema
 
-將 OpenSpec 的 artifact 治理流程與 Superpowers 的執行技能整合為單一工作流。
+Integrates OpenSpec artifact governance with Superpowers execution skills into one workflow.
 
 ## Install
 

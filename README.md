@@ -1,32 +1,31 @@
 # openspec-schemas
 
-[English](./README.md) · [繁體中文](./README.zh-TW.md)
+Community-схемы для [OpenSpec](https://github.com/Fission-AI/OpenSpec). Каждая схема поставляется как самодостаточный bundle: ее можно установить на user-level для всех локальных проектов или положить в конкретный проект в `openspec/schemas/` и выбирать для change через `--schema <name>`.
 
-Community-contributed [OpenSpec](https://github.com/Fission-AI/OpenSpec) schemas. Each schema is a self-contained bundle that you can install either into OpenSpec's user-level schema directory for all local projects, or into a project's `openspec/schemas/` directory and select per-change with `--schema <name>`.
+## Bridge в этом репозитории
 
-## Bridges in this repository
+| Bridge | Назначение | Статус |
+|---|---|---|
+| [superpowers-bridge](./superpowers-bridge/) | Соединяет artifact governance OpenSpec с execution skills из [obra/superpowers](https://github.com/obra/superpowers): brainstorming, writing-plans, TDD через subagents, code review и finishing. Дополнительно добавляет evidence-first artifact `retrospective`. | v1 |
 
-| Bridge | Purpose | Status |
-|--------|---------|--------|
-| [`superpowers-bridge`](./superpowers-bridge/) | Bridges OpenSpec's artifact governance with [obra/superpowers](https://github.com/obra/superpowers) execution skills (brainstorming, writing-plans, TDD-via-subagents, code review, finishing). Adds an evidence-first `retrospective` artifact filling a gap Superpowers does not natively cover. | v1 |
+## Почему отдельный репозиторий
 
-## Why a separate repository?
+[OpenSpec PR #970](https://github.com/Fission-AI/OpenSpec/pull/970) изначально предлагал встроенную схему `sdd-plus-superpowers`. После review maintainer-ов интеграция была вынесена в community repository. Это тот же подход, что и у [community extension catalog](https://speckit-community.github.io/extensions/) в spec-kit: сторонние интеграции живут вне core.
 
-[OpenSpec PR #970](https://github.com/Fission-AI/OpenSpec/pull/970) originally proposed `sdd-plus-superpowers` as a built-in schema. After maintainer review, the integration moved to a community repository — same pattern as [github/spec-kit's community extension catalog](https://speckit-community.github.io/extensions/), which keeps third-party tool integrations out of core.
+Плюсы:
 
-Benefits:
-- OpenSpec core does not take on Superpowers' release cadence
-- Bridge can iterate independently
-- Other community schemas can join this repository as siblings
+- OpenSpec core не привязывается к release cadence Superpowers.
+- Bridge может развиваться независимо.
+- Другие community-схемы можно добавлять рядом как siblings.
 
-## Install
+## Установка
 
-Each bridge directory has its own `README.md` with user-level and project-local installation methods. See e.g. [`superpowers-bridge/README.md#install`](./superpowers-bridge/README.md#install).
+У каждого bridge есть собственный README с user-level и project-local установкой. Для текущего bridge см. [superpowers-bridge/README.md#установка](./superpowers-bridge/README.md#установка).
 
 ## Roadmap
 
-See [`docs/roadmap.md`](./docs/roadmap.md) for what's planned.
+План развития см. в [docs/roadmap.md](./docs/roadmap.md).
 
-## License
+## Лицензия
 
-MIT — see [LICENSE](./LICENSE).
+MIT, см. [LICENSE](./LICENSE).
